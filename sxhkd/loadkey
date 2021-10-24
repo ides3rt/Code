@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+get_Key="$(setxkbmap -print | grep xkb_symbols | awk '{print $4}' | awk -F"+" '{print $2}')"
+
+case "$get_Key" in
+  'us')
+    setxkbmap th ;;
+  'th')
+    setxkbmap us ;;
+esac

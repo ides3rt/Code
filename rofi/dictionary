@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+File="$HOME/.local/share/dictionary"
+
+[ ! -f "$File" ] && touch $File
+
+Word="$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')"
+
+[ -z "$Word" ] && exit
+
+if [ -z "$(grep -Ei "^$Word" $File)" ]; then
+  Meaning="$(rofi -dmenu -p 'Meaning')"
+  [ -z "$Meaning" ] && exit
+  echo "$Word - $Meaning" >> $File
+else
+  grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching' >/dev/null
+fi
+
+unset File Word Meaning

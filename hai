@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+umask 0077
+
+if [ -f '/usr/bin/doas' ]; then
+  auth='doas --'
+elif [ -f '/usr/bin/sudo' ]; then
+  auth='sudo'
+else
+  auth='su -c'
+fi
+
+$auth pacman -S dash ksh linux-headers nvidia-dkms xorg-server xorg-xinit xorg-xsetroot xorg-xrandr git wget links man htop
+
+$auth systemctl enable fstrim.timer
+
+$auth sed -i '{s/#MAKEFLAGS="-j2"/MAKEFLAGS="-j7"/}' /etc/makepkg.conf
+
+if [ "$auth" = 'doas --' ]; then
+  $auth sed -i '{s/#PACMAN_AUTH=()/PACMAN_AUTH=(doas --)/}' /etc/makepkg.conf
+  $auth ln -s /usr/bin/doas /usr/local/bin/sudo
+fi
+
+git clone https://aur.archlinux.org/yay.git
+
+cd yay && makepkg -si
+
+mkdir $HOME/Documents
+
+git clone https://github.com/ides3rt/d3.git $HOME/Documents/d3
+
+cp -r $HOME/Documents/d3/dotfiles/.{bash,config,xinit,env,profile,X*} $HOME/
+
+cp -r $HOME/Documents/d3/Pictures $HOME/
+
+cp -r $HOME/Documents/d3/scripts $HOME/.scripts
+
+chmod u+x $HOME/.config/bspwm/bspwmrc $HOME/.scripts/{*,*/*}
+
+$auth cp $HOME/Documents/d3/sys-files/usr/lib/firefox/distribution/policies.json /usr/lib/firefox/distribution/
+
+$auth chmod 644 /usr/lib/firefox/distribution/policies.json
+
+cp $HOME/Documents/d3/documents/firefox-privacy/user.js $HOME/.mozilla/firefox/*.default-release/
+
+$auth cp -r $HOME/Documents/d3/slash-etc/pacman.d/hooks /etc/pacman.d/
+
+$auth chmod 755 /etc/pacman.d/hooks
+
+$auth cp $HOME/Documents/d3/slash-etc/sysctl.d/99-sysctl.conf /etc/sysctl.d/
+
+yay -S pacman-contrib arc-solid-gtk-theme papirus-icon-theme xcursor-oxygen ttf-font-awesome terminus-font timeshift timeshift-autosnap grub-btrfs
+
+$auth systemctl enable grub-btrfs.path
+
+$auth pacman -S bspwm sxhkd lxsession alacritty pcmanfm feh sxiv scrot gimp picom rofi leafpad gtk-engine-murrine gnome-themes-standard lxappearance ttf-roboto ttf-roboto-mono firefox ffmpeg pipewire pipewire-pulse mpv
