@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+trap 'unset get_Key' EXIT
+
 get_Key="$(setxkbmap -print | grep xkb_symbols | awk '{print $4}' | awk -F"+" '{print $2}')"
 
 case "$get_Key" in

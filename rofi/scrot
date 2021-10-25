@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
-options=(
+trap 'unset Options Options' EXIT
+
+Options=(
 	'Entire screen'
 	'Choose specific window'
 	'Focused window'
 )
 
-choice="$(printf '%s\n' "${options[@]}" | rofi -dmenu -p 'Screenshot')"
+Option="$(printf '%s\n' "${options[@]}" | rofi -dmenu -p 'Screenshot')"
 
-[ -z "$choice" ] && exit
+[ -z "$Option" ] && exit
 
-case $choice in
+case "$Option" in
 	'Entire screen')
 		scrot -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
 	'Choose specific window')

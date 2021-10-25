@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'unset File Word Meaning' EXIT
+
 File="$HOME/.local/share/dictionary"
 
 [ ! -f "$File" ] && touch $File
@@ -15,5 +17,3 @@ if [ -z "$(grep -Ei "^$Word" $File)" ]; then
 else
 	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching' >/dev/null
 fi
-
-unset File Word Meaning
