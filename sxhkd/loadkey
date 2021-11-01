@@ -1,12 +1,14 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 trap 'unset get_Key' EXIT
 
-get_Key="$(setxkbmap -print | grep xkb_symbols | awk '{print $4}' | awk -F"+" '{print $2}')"
+get_Key="$(setxkbmap -print | grep 'xkb_symbols' | awk '{print $4}' | awk -F + '{print $2}')"
 
 case "$get_Key" in
-  'us')
-    setxkbmap th ;;
-  'th')
-    setxkbmap us ;;
+	us\(colemak\))
+		setxkbmap th ;;
+	th)
+		setxkbmap us -variant colemak ;;
+	*)
+		setxkbmap us -variant colemak ;;
 esac
