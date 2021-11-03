@@ -8,7 +8,7 @@ Options=(
 	'Focused window'
 )
 
-Option="$(printf '%s\n' "${options[@]}" | rofi -dmenu -p 'Screenshot')"
+Option="$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')"
 
 [ -z "$Option" ] && exit
 
