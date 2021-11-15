@@ -4,16 +4,18 @@ trap 'unset File Word Meaning' EXIT
 
 File="$HOME/.local/share/dictionary"
 
-[ ! -f "$File" ] && touch $File
+[ -f "$File" ] || touch $File
 
 Word="$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')"
 
 [ -z "$Word" ] && exit
 
-if [ -z "$(grep -Ei "^$Word" $File)" ]; then
+if [ -z `grep -Eio "^$Word" $File` ]; then
+
 	Meaning="$(rofi -dmenu -p 'Meaning')"
 	[ -z "$Meaning" ] && exit
+
 	echo "$Word - $Meaning" >> $File
 else
-	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching' >/dev/null
+	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching' &>/dev/null
 fi
