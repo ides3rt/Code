@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-trap 'unset Options Options' EXIT
+trap 'unset Options Option' EXIT
 
 Options=(
 	'Entire screen'
@@ -8,7 +8,7 @@ Options=(
 	'Focused window'
 )
 
-Option="$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')"
+Option=$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')
 
 [ -z "$Option" ] && exit
 
@@ -19,5 +19,4 @@ case "$Option" in
 		scrot -s -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
 	'Focused window')
 		scrot -u -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
-	*) ;;
 esac

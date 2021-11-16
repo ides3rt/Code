@@ -1,6 +1,6 @@
 #!/bin/sh
 
-trap 'unset get_Key' EXIT
+trap 'unset Key' EXIT
 
 Key="$(setxkbmap -print | grep 'xkb_symbols' | awk '{print $4}' | awk -F + '{print $2}')"
 

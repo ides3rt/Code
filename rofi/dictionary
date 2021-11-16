@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 
-trap 'unset File Word Meaning' EXIT
+trap 'unset File Word Meaning Exist' EXIT
 
 File="$HOME/.local/share/dictionary"
 
 [ -f "$File" ] || touch $File
 
-Word="$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')"
+Word=$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')
 
 [ -z "$Word" ] && exit
 
-if [ -z `grep -Eio "^$Word" $File` ]; then
+Exist=$(grep -Eio "^$Word" $File)
 
-	Meaning="$(rofi -dmenu -p 'Meaning')"
+if [ -z "$Exist" ]; then
+
+	Meaning=$(rofi -dmenu -p 'Meaning')
 	[ -z "$Meaning" ] && exit
 
 	echo "$Word - $Meaning" >> $File
 else
-	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching' &>/dev/null
+	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching'
 fi
