@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-trap 'unset File Word Meaning Exist' EXIT
-
 File="$HOME/.local/share/dictionary"
 
 [ -f "$File" ] || touch $File
