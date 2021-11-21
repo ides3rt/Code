@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+Yes=0
+Force=0
+
+Usage() {
+	while read; do
+		printf '%s\n' "$REPLY"
+	done <<-EOF
+		Usage: rst [OPTIONS]
+
+		  -h, --help      - Displays this help information.
+		  -f, --force     - Allows \`root\` to run rst().
+		  -y, --yes       - Answers \`Yes\` to all questions.
+
+	EOF
+}
+
+ERR() {
+	printf '%s\n' "ERR: $2" 1>&2
+	[ $1 -gt 0 ] && exit $1
+}
+
+while [ -n "$1" ]; do
+	case "$1" in
+
+		-h|--help)
+			Usage; exit 0 ;;
+
+		-f|--force)
+			Force=1 ;;
+
+		-y|--yes)
+			Yes=1 ;;
+
+		*)
+			ERR 1 "unknown option $1..." ;;
+	esac
+	shift
+done
+
+if [ $UID -eq 0 -a $Force -ne 1 ]; then
+	ERR 1 'avoid running this script as root...'
+fi
+
+Ask() {
+	local AnsWer=Yes
+
+	while [ $Yes -ne 1 ]; do
+		read -p "Do you want to clear $1? [Y/n]: "
+		case "$REPLY" in
+
+		[Yy][Ee][Ss]|[Yy]|'')
+			break ;;
+
+		[Nn][Oo]|[Nn])
+			local AnsWer=No
+			break ;;
+
+		*)
+			printf 'ERR: invaild answer(s)...\n' ;;
+		esac
+	done
+	shift
+	[ "$AnsWer" = Yes ] && rm -rf -- "$@"
+}
+
+if [ -n "$(ls -A $HOME/.cache/ 2>/dev/null)" ]; then
+
+	Ask cache $HOME/.cache/*
+fi
+
+FFDir="$HOME/.mozilla/firefox"
+
+if [ -d "$FFDir/Crash Reports" -o -d "$FFDir/Pending Pings" ]; then
+
+	Ask "firefox's reports" "$FFDir/Crash Reports" "$FFDir/Pending Pings"
+fi
+
+if [ -f "$HOME/.viminfo" -o -f "$HOME/.vim/.netrwhist" ]; then
+
+	Ask "vim's cache" $HOME/.viminfo $HOME/.vim/.netrwhist
+fi

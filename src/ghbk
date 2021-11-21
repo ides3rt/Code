@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+Dir0=/media/ides3rt/USB1p2/GitHub/repositories
+
+[ -d "$Dir0" ] ||
+	{ printf '%s\n' "ERR: $Dir0 doesn't exists.." 1>&2; exit 1 ;}
+
+List=(
+	'bin' 'doasedit' 'doc' 'dotfiles'
+	'ex' 'firefox' 'gists' 'librewolf'
+	'pic' 'sys' 'exit'
+)
+
+Num=$(wc -w <<< "${List[@]}")
+
+PS3="Select your repo [1-$Num]: "
+
+select Repo in ${List[@]}; do
+
+	case "$Repo" in
+		exit)
+			break ;;
+
+		gists)
+			cp -- $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists ;;
+
+		*)
+			if [ -n "$Repo" ]; then
+				[ -d "$Dir0/$Repo" ] && rm -rf $Dir0/$Repo
+				git clone -q https://github.com/ides3rt/$Repo $Dir0/$Repo ||
+					printf '%s\n' "$Repo doesn't exists..."
+			fi ;;
+
+	esac
+
+done
