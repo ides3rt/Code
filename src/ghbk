@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
-Dir0=/media/ides3rt/USB1p2/GitHub/repositories
+Dir=/media/ides3rt/USB1p2/GitHub/repositories
 
-[ -d "$Dir0" ] ||
-	{ printf '%s\n' "ERR: $Dir0 doesn't exists.." 1>&2; exit 1 ;}
+[ -d "$Dir" ] ||
+	{ printf '%s\n' "ERR: $Dir doesn't exists.." 1>&2; exit 1 ;}
 
-List=(
-	'bin' 'doasedit' 'doc' 'dotfiles'
-	'ex' 'firefox' 'gists' 'librewolf'
-	'pic' 'sys' 'exit'
+Repositories=(
+	'Code' 'config' 'Documents' 'doasedit'
+	'dotfiles' 'firefox' 'gists' 'librewolf'
+	'Pictures' 'exit'
 )
 
-Num=$(wc -w <<< "${List[@]}")
+Count=$(wc -w <<< "${Repositories[@]}")
 
-PS3="Select your repo [1-$Num]: "
+PS3="Select your repository [1-$Count]: "
 
-select Repo in ${List[@]}; do
+select Repository in ${Repositories[@]}; do
 
-	case "$Repo" in
+	case "$Repository" in
 		exit)
 			break ;;
 
@@ -25,9 +25,10 @@ select Repo in ${List[@]}; do
 			cp -- $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists ;;
 
 		*)
-			if [ -n "$Repo" ]; then
-				[ -d "$Dir0/$Repo" ] && rm -rf $Dir0/$Repo
-				git clone -q https://github.com/ides3rt/$Repo $Dir0/$Repo ||
+			if [ -n "$Repository" ]; then
+				[ -d "$Dir/$Repository" ] && rm -rf $Dir/$Repository
+				git clone -q https://github.com/ides3rt/$Repository \
+					$Dir/$Repository ||
 					printf '%s\n' "$Repo doesn't exists..."
 			fi ;;
 
