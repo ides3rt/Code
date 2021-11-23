@@ -34,17 +34,17 @@ while [ -n "$1" ]; do
 			Yes=1 ;;
 
 		*)
-			ERR 1 "unknown option $1..." ;;
+			ERR 1 "unknown option(s) $1..." ;;
 	esac
 	shift
 done
 
-if [ $UID -eq 0 -a $Force -ne 1 ]; then
+if [ "$(id -u)" -eq 0 -a $Force -ne 1 ]; then
 	ERR 1 'avoid running this script as root...'
 fi
 
 Ask() {
-	local AnsWer=Yes
+	local Answer=Yes
 
 	while [ $Yes -ne 1 ]; do
 		read -p "Do you want to clear $1? [Y/n]: "
@@ -54,7 +54,7 @@ Ask() {
 			break ;;
 
 		[Nn][Oo]|[Nn])
-			local AnsWer=No
+			local Answer=No
 			break ;;
 
 		*)
@@ -62,7 +62,7 @@ Ask() {
 		esac
 	done
 	shift
-	[ "$AnsWer" = Yes ] && rm -rf -- "$@"
+	[ "$Answer" = Yes ] && rm -rf -- "$@"
 }
 
 if [ -n "$(ls -A $HOME/.cache/ 2>/dev/null)" ]; then

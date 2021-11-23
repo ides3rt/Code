@@ -2,13 +2,13 @@
 
 File="$HOME/.local/share/dictionary"
 
-[ -f "$File" ] || touch $File
+[ -f "$File" ] || echo '' > $File
 
 Word=$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')
 
 [ -z "$Word" ] && exit
 
-Exist=$(grep -Eio "^$Word" $File)
+Exist=$(grep -io "^$Word" $File)
 
 if [ -z "$Exist" ]; then
 
@@ -17,5 +17,5 @@ if [ -z "$Exist" ]; then
 
 	echo "$Word - $Meaning" >> $File
 else
-	grep -Ei "^$Word" $File | rofi -dmenu -i -p 'Matching'
+	grep -i "^$Word" $File | rofi -dmenu -i -p 'Matching'
 fi

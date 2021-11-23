@@ -1,14 +1,13 @@
 #!/bin/sh
 
-trap 'unset Key' EXIT
+key(){
+	setxkbmap -print | grep 'xkb_symbols' | \
+		awk '{print $4}' | awk -F + '{print $2}'
+}
 
-Key="$(setxkbmap -print | grep 'xkb_symbols' | awk '{print $4}' | awk -F + '{print $2}')"
-
-case "$Key" in
+case $(key) in
 	'us(colemak)')
 		setxkbmap th ;;
-	th)
-		setxkbmap us -variant colemak ;;
 	*)
 		setxkbmap us -variant colemak ;;
 esac

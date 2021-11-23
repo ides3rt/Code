@@ -29,7 +29,7 @@ select Repository in ${Repositories[@]}; do
 				[ -d "$Dir/$Repository" ] && rm -rf $Dir/$Repository
 				git clone -q https://github.com/ides3rt/$Repository \
 					$Dir/$Repository ||
-					printf '%s\n' "$Repo doesn't exists..."
+					printf '%s\n' "$Repository doesn't exists..."
 			fi ;;
 
 	esac
