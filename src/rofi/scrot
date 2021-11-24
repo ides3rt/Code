@@ -10,11 +10,15 @@ Option=$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')
 
 [ -z "$Option" ] && exit
 
+Screenshot(){
+	scrot "$@" -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/'
+}
+
 case "$Option" in
 	'Entire screen')
-		scrot -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
+		Screenshot ;;
 	'Choose specific window')
-		scrot -s -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
+		Screenshot -s ;;
 	'Focused window')
-		scrot -u -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/' ;;
+		Screenshot -u ;;
 esac

@@ -58,26 +58,22 @@ Ask() {
 			break ;;
 
 		*)
-			printf 'ERR: invaild answer(s)...\n' ;;
+			ERR 0 'invaild answer(s)...' ;;
 		esac
 	done
 	shift
-	[ "$Answer" = Yes ] && rm -rf -- "$@"
+	[ "$Answer" = Yes ] && rm -rf "$@"
 }
 
 if [ -n "$(ls -A $HOME/.cache/ 2>/dev/null)" ]; then
-
 	Ask cache $HOME/.cache/*
 fi
 
 FFDir="$HOME/.mozilla/firefox"
-
 if [ -d "$FFDir/Crash Reports" -o -d "$FFDir/Pending Pings" ]; then
-
 	Ask "firefox's reports" "$FFDir/Crash Reports" "$FFDir/Pending Pings"
 fi
 
 if [ -f "$HOME/.viminfo" -o -f "$HOME/.vim/.netrwhist" ]; then
-
 	Ask "vim's cache" $HOME/.viminfo $HOME/.vim/.netrwhist
 fi

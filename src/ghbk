@@ -16,22 +16,24 @@ Count=$(wc -w <<< "${Repositories[@]}")
 PS3="Select your repository [1-$Count]: "
 
 select Repository in ${Repositories[@]}; do
-
 	case "$Repository" in
 		exit)
 			break ;;
 
 		gists)
-			cp -- $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists ;;
+			cp $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists/ ;;
 
 		*)
 			if [ -n "$Repository" ]; then
-				[ -d "$Dir/$Repository" ] && rm -rf $Dir/$Repository
-				git clone -q https://github.com/ides3rt/$Repository \
-					$Dir/$Repository ||
+
+				DDir="$Dir/$Repository"
+				[ -d "$DDir" ] && rm -rf $DDir
+
+				URL="https://github.com/ides3rt/$Repository"
+
+				git clone -q "$URL" "$DDir" ||
 					printf '%s\n' "$Repository doesn't exists..."
 			fi ;;
 
 	esac
-
 done

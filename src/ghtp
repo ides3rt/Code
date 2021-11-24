@@ -2,19 +2,22 @@
 
 Permissions=$(ls -ld $1 | awk '{print $1}')
 Permissions="${Permissions#?}"
+
 Owner="${Permissions%??????}"
-Group="${Permissions#???}"; Group="${Group%???}"
+
+Group="${Permissions#???}"
+Group="${Group%???}"
+
 Others="${Permissions#??????}"
 
-Permissions=
-
-List=(
+All=(
 	"$Owner"
 	"$Group"
 	"$Others"
 )
 
-for Permission in ${List[@]}; do
+Permissions=
+for Permission in ${All[@]}; do
 	case "$Permission" in
 		'---')
 			Permission=0 ;;

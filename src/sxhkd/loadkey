@@ -1,12 +1,10 @@
 #!/bin/sh
 
-key(){
-	setxkbmap -print | grep 'xkb_symbols' | \
-		awk '{print $4}' | awk -F + '{print $2}'
-}
+CurrentMap=$(setxkbmap -print | grep 'xkb_symbols' | \
+	awk '{print $4}' | awk -F + '{print $2}')
 
-case $(key) in
-	'us(colemak)')
+case "$CurrentMap" in
+	*us*)
 		setxkbmap th ;;
 	*)
 		setxkbmap us -variant colemak ;;
