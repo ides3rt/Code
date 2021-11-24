@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'sync' EXIT
+
 Yes=0
 Force=0
 
@@ -39,8 +41,8 @@ while [ -n "$1" ]; do
 	shift
 done
 
-if [ "$(id -u)" -eq 0 -a $Force -ne 1 ]; then
-	ERR 1 'avoid running this script as root...'
+if [ $UID -eq 0 -a $Force -ne 1 ]; then
+	ERR 1 'denied to run rst() as root...'
 fi
 
 Ask() {
@@ -65,15 +67,18 @@ Ask() {
 	[ "$Answer" = Yes ] && rm -rf "$@"
 }
 
-if [ -n "$(ls -A $HOME/.cache/ 2>/dev/null)" ]; then
-	Ask cache $HOME/.cache/*
+for CacheDir in $HOME/.cache/?*; do
+	[ -e "$CacheDir" ] || unset CacheDir; break
+done
+[ -n "$CacheDir" ] && Ask cache $HOME/.cache/*
+
+FFCrash="$HOME/.mozilla/firefox/Crash Reports"
+FFPings="$HOME/.mozilla/firefox/Pending Pings"
+if [ -d "$FFCrash" -o -d "$FFPings" ]; then
+	Ask "firefox's reports" "$FFCrash" "$FFPings"
 fi
 
-FFDir="$HOME/.mozilla/firefox"
-if [ -d "$FFDir/Crash Reports" -o -d "$FFDir/Pending Pings" ]; then
-	Ask "firefox's reports" "$FFDir/Crash Reports" "$FFDir/Pending Pings"
-fi
-
-if [ -f "$HOME/.viminfo" -o -f "$HOME/.vim/.netrwhist" ]; then
-	Ask "vim's cache" $HOME/.viminfo $HOME/.vim/.netrwhist
+VimInfo="$HOME/.viminfo"; VimNetR="$HOME/.vim/.netrwhist"
+if [ -f "$VimInfo" -o -f "$VimNetR" ]; then
+	Ask "vim's cache" "$VimInfo" "$VimNetR"
 fi

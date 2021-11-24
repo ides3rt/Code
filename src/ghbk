@@ -11,7 +11,7 @@ Repositories=(
 	'Pictures' 'exit'
 )
 
-Count=$(wc -w <<< "${Repositories[@]}")
+Count=${#Repositories[@]}
 
 PS3="Select your repository [1-$Count]: "
 

@@ -2,15 +2,13 @@
 
 File="$HOME/.local/share/dictionary"
 
-[ -f "$File" ] || echo '' > $File
+[ -f "$File" ] || > $File
 
 Word=$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')
 
 [ -z "$Word" ] && exit
 
-Exist=$(grep -io "^$Word" $File)
-
-if [ -z "$Exist" ]; then
+if [ -z "$(grep -io "^$Word" $File)" ]; then
 
 	Meaning=$(rofi -dmenu -p 'Meaning')
 	[ -z "$Meaning" ] && exit

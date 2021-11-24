@@ -2,21 +2,16 @@
 
 Permissions=$(ls -ld $1 | awk '{print $1}')
 Permissions="${Permissions#?}"
-
 Owner="${Permissions%??????}"
-
 Group="${Permissions#???}"
 Group="${Group%???}"
-
 Others="${Permissions#??????}"
-
 All=(
 	"$Owner"
 	"$Group"
 	"$Others"
 )
-
-Permissions=
+unset Permissions
 for Permission in ${All[@]}; do
 	case "$Permission" in
 		'---')
@@ -38,5 +33,4 @@ for Permission in ${All[@]}; do
 	esac
 	Permissions+="$Permission"
 done
-
 printf '%s\n' "$Permissions"
