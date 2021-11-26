@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'sync' EXIT
+
 Dir=/media/ides3rt/USB1p2/GitHub/repositories
 
 [ -d "$Dir" ] ||

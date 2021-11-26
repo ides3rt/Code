@@ -72,8 +72,8 @@ for CacheDir in $HOME/.cache/?*; do
 done
 [ -n "$CacheDir" ] && Ask cache $HOME/.cache/*
 
-FFCrash="$HOME/.mozilla/firefox/Crash Reports"
-FFPings="$HOME/.mozilla/firefox/Pending Pings"
+FFDir="$HOME/.mozilla/firefox"
+FFCrash="$FFDir/Crash Reports"; FFPings="$FFDir/Pending Pings"
 if [ -d "$FFCrash" -o -d "$FFPings" ]; then
 	Ask "firefox's reports" "$FFCrash" "$FFPings"
 fi
