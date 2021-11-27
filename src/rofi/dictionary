@@ -1,17 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 File="$HOME/.local/share/dictionary"
 
-[ -f "$File" ] || > $File
+test -f "$File" || printf '' > $File
 
-Word=$(sed 's/ - .*//' $File | rofi -dmenu -i -p 'Word')
+Word=$(while read -r CurLine; do printf '%s\n' "${CurLine% -*}"; done < $File \
+	| rofi -dmenu -i -p 'Word')
 
-[ -z "$Word" ] && exit
+test -z "$Word" && exit
 
-if [ -z "$(grep -io "^$Word" $File)" ]; then
+if test -z "$(grep -io "^$Word" $File)"; then
 
 	Meaning=$(rofi -dmenu -p 'Meaning')
-	[ -z "$Meaning" ] && exit
+	test -z "$Meaning" && exit
 
 	echo "$Word - $Meaning" >> $File
 else

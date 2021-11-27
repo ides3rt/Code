@@ -4,7 +4,7 @@ trap 'sync' EXIT
 
 Dir=/media/ides3rt/USB1p2/GitHub/repositories
 
-[ -d "$Dir" ] ||
+[[ -d "$Dir" ]] ||
 	{ printf '%s\n' "ERR: $Dir doesn't exists.." 1>&2; exit 1 ;}
 
 Repositories=(
@@ -26,16 +26,13 @@ select Repository in ${Repositories[@]}; do
 			cp $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists/ ;;
 
 		*)
-			if [ -n "$Repository" ]; then
+			DDir="$Dir/$Repository"
+			[[ -d "$DDir" ]] && rm -rf $DDir
 
-				DDir="$Dir/$Repository"
-				[ -d "$DDir" ] && rm -rf $DDir
+			URL="https://github.com/ides3rt/$Repository"
 
-				URL="https://github.com/ides3rt/$Repository"
-
-				git clone -q "$URL" "$DDir" ||
-					printf '%s\n' "$Repository doesn't exists..."
-			fi ;;
+			git clone -q "$URL" "$DDir" ||
+				printf '%s\n' "$Repository doesn't exists..." ;;
 
 	esac
 done

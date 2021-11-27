@@ -20,10 +20,10 @@ Usage() {
 
 ERR() {
 	printf '%s\n' "ERR: $2" 1>&2
-	[ $1 -gt 0 ] && exit $1
+	(($1 > 0)) && exit $1
 }
 
-while [ -n "$1" ]; do
+while [[ -n "$1" ]]; do
 	case "$1" in
 
 		-h|--help)
@@ -41,14 +41,14 @@ while [ -n "$1" ]; do
 	shift
 done
 
-if [ $UID -eq 0 -a $Force -ne 1 ]; then
+if ((UID == 0 && Force != 1)); then
 	ERR 1 'denied to run rst() as root...'
 fi
 
 Ask() {
 	local Answer=Yes
 
-	while [ $Yes -ne 1 ]; do
+	while ((Yes != 1)); do
 		read -p "Do you want to clear $1? [Y/n]: "
 		case "$REPLY" in
 
@@ -60,25 +60,29 @@ Ask() {
 			break ;;
 
 		*)
-			ERR 0 'invaild answer(s)...' ;;
+			ERR 0 'Invaild answer(s)...' ;;
 		esac
 	done
 	shift
-	[ "$Answer" = Yes ] && rm -rf "$@"
+	[[ "$Answer" = Yes ]] && rm -rf "$@"
 }
 
 for CacheDir in $HOME/.cache/?*; do
-	[ -e "$CacheDir" ] || unset CacheDir; break
+	[[ -e "$CacheDir" ]] || unset CacheDir
+	break
 done
-[ -n "$CacheDir" ] && Ask cache $HOME/.cache/*
+
+[[ -n "$CacheDir" ]] && Ask cache $HOME/.cache/*
 
 FFDir="$HOME/.mozilla/firefox"
 FFCrash="$FFDir/Crash Reports"; FFPings="$FFDir/Pending Pings"
-if [ -d "$FFCrash" -o -d "$FFPings" ]; then
+
+if [[ -d "$FFCrash" || -d "$FFPings" ]]; then
 	Ask "firefox's reports" "$FFCrash" "$FFPings"
 fi
 
 VimInfo="$HOME/.viminfo"; VimNetR="$HOME/.vim/.netrwhist"
-if [ -f "$VimInfo" -o -f "$VimNetR" ]; then
+
+if [[ -f "$VimInfo" || -f "$VimNetR" ]]; then
 	Ask "vim's cache" "$VimInfo" "$VimNetR"
 fi

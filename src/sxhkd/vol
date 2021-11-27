@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-pactl set-sink-volume @DEFAULT_SINK@ $1
-
-CurVol=$(pactl get-sink-volume @DEFAULT_SINK@ | head -n 1 | awk '{print $5}')
-
-dunstify "Volume: $CurVol"

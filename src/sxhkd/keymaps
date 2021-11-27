@@ -4,7 +4,7 @@ CurrentMap=$(setxkbmap -print | grep 'xkb_symbols' | \
 	awk '{print $4}' | awk -F + '{print $2}')
 
 case "$CurrentMap" in
-	*us*)
+	us*)
 		setxkbmap th ;;
 	*)
 		setxkbmap us -variant colemak ;;

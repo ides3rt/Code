@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+pactl set-sink-volume @DEFAULT_SINK@ "$@"
+
+read F1 F2 F3 F4 F5 _ <<< "$(pactl get-sink-volume @DEFAULT_SINK@)"
+
+dunstify "Volume: $F5"
