@@ -1,9 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-CurrentMap=$(setxkbmap -print | grep 'xkb_symbols' | \
-	awk '{print $4}' | awk -F + '{print $2}')
+while read; do
+	[[ $REPLY =~ xkb_symbols ]] && break
+done <<< "$(setxkbmap -print)"
 
-case "$CurrentMap" in
+read F1 F2 F3 F4 _ <<< "$REPLY"
+IFS='+' read F1 F2 _ <<< "$F4"
+
+case "$F2" in
 	us*)
 		setxkbmap th ;;
 	*)
