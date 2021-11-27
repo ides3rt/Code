@@ -18,9 +18,10 @@ Count=${#Repositories[@]}
 PS3="Select your repository [1-$Count]: "
 
 select Repository in ${Repositories[@]}; do
+	[[ -z $Repository ]] && continue
 	case "$Repository" in
 		exit)
-			break ;;
+			exit 0 ;;
 
 		gists)
 			cp $HOME/GitHub/gists/* /media/ides3rt/USB1p2/GitHub/gists/ ;;
