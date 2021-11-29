@@ -5,16 +5,16 @@ File="$HOME/.local/share/dictionary"
 test -f "$File" || printf '' > $File
 
 Word=$(while read -r CurLine; do printf '%s\n' "${CurLine% -*}"; done < $File \
-	| rofi -dmenu -i -p 'Word')
+	| rofi -dmenu -i -p 'Word: ')
 
 test -z "$Word" && exit
 
 if test -z "$(grep -io "^$Word" $File)"; then
 
-	Meaning=$(rofi -dmenu -p 'Meaning')
+	Meaning=$(rofi -dmenu -p 'Meaning: ')
 	test -z "$Meaning" && exit
 
 	echo "$Word - $Meaning" >> $File
 else
-	grep -i "^$Word" $File | rofi -dmenu -i -p 'Matching'
+	grep -i "^$Word" $File | rofi -dmenu -i -p 'Matching: '
 fi
