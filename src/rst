@@ -5,7 +5,7 @@ trap 'sync' EXIT
 Yes=0
 Force=0
 
-Usage() {
+function Usage {
 	while read; do
 		printf '%s\n' "$REPLY"
 	done <<-EOF
@@ -18,7 +18,7 @@ Usage() {
 	EOF
 }
 
-ERR() {
+function ERR {
 	printf '%s\n' "ERR: $2" 1>&2
 	(($1 > 0)) && exit $1
 }
@@ -45,7 +45,7 @@ if ((UID == 0 && Force != 1)); then
 	ERR 1 'denied to run rst() as root...'
 fi
 
-Ask() {
+function Ask {
 	local Answer=Yes
 
 	while ((Yes != 1)); do
