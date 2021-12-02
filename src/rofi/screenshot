@@ -10,7 +10,7 @@ Option=$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')
 
 [[ -z "$Option" ]] && exit
 
-function Screenshot {
+Screenshot() {
 	scrot "$@" -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/'
 }
 
