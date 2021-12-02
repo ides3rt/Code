@@ -1,31 +1,30 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 trap 'sync' EXIT
 
 Yes=0
 Force=0
 
-function Usage {
-	while read; do
-		printf '%s\n' "$REPLY"
+Usage() {
+	while read -r REPLY; do
+		printf '%b\n' "$REPLY"
 	done <<-EOF
-		Usage: rst [OPTIONS]
+		\rUsage: rst [OPTIONS]
 
-		  -h, --help      - Displays this help information.
-		  -f, --force     - Allows \`root\` to run rst().
-		  -y, --yes       - Answers \`Yes\` to all questions.
+		\r  -h, --help      - Displays this help information.
+		\r  -f, --force     - Allows \`root\` to run rst().
+		\r  -y, --yes       - Answers \`Yes\` to all questions.
 
 	EOF
 }
 
-function ERR {
+ERR() {
 	printf '%s\n' "ERR: $2" 1>&2
-	(($1 > 0)) && exit $1
+	test $1 -gt 0 && exit $1
 }
 
-while [[ -n "$1" ]]; do
+while test "$1"; do
 	case "$1" in
-
 		-h|--help)
 			Usage; exit 0 ;;
 
@@ -41,48 +40,46 @@ while [[ -n "$1" ]]; do
 	shift
 done
 
-if ((UID == 0 && Force != 1)); then
+if test `id -u` -eq 0 -a $Force -eq 0; then
 	ERR 1 'denied to run rst() as root...'
 fi
 
-function Ask {
+Ask() {
 	local Answer=Yes
-
-	while ((Yes != 1)); do
-		read -p "Do you want to clear $1? [Y/n]: "
+	while test $Yes -eq 0; do
+		read -p "Do you want to clear $1? [Y/n]: " REPLY
 		case "$REPLY" in
+			[Yy][Ee][Ss]|[Yy]|'')
+				break ;;
 
-		[Yy][Ee][Ss]|[Yy]|'')
-			break ;;
+			[Nn][Oo]|[Nn])
+				local Answer=No
+				break ;;
 
-		[Nn][Oo]|[Nn])
-			local Answer=No
-			break ;;
-
-		*)
-			ERR 0 'Invaild answer(s)...' ;;
+			*)
+				ERR 0 'Invaild answer(s)...' ;;
 		esac
 	done
 	shift
-	[[ "$Answer" = Yes ]] && rm -rf "$@"
+	test "$Answer" = Yes && rm -rf "$@"
 }
 
 for CacheDir in $HOME/.cache/?*; do
-	[[ -e "$CacheDir" ]] || unset CacheDir
+	test -e "$CacheDir" || unset CacheDir
 	break
 done
 
-[[ -n "$CacheDir" ]] && Ask cache $HOME/.cache/*
+test -n "$CacheDir" && Ask cache $HOME/.cache/*
 
 FFDir="$HOME/.mozilla/firefox"
 FFCrash="$FFDir/Crash Reports"; FFPings="$FFDir/Pending Pings"
 
-if [[ -d "$FFCrash" || -d "$FFPings" ]]; then
+if test -d "$FFCrash" -o -d "$FFPings"; then
 	Ask "firefox's reports" "$FFCrash" "$FFPings"
 fi
 
-VimInfo="$HOME/.viminfo"; VimNetR="$HOME/.vim/.netrwhist"
+viminfo="$HOME/.viminfo"; vimnetr="$HOME/.vim/.netrwhist"
 
-if [[ -f "$VimInfo" || -f "$VimNetR" ]]; then
-	Ask "vim's cache" "$VimInfo" "$VimNetR"
+if test -f "$viminfo" -o -f "$vimnetr"; then
+	Ask "vim's cache" "$viminfo" "$vimnetr"
 fi
