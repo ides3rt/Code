@@ -1,20 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-Options=(
-	'Entire screen'
-	'Choose specific window'
-	'Focused window'
-)
+Choice=$(printf '%s\n' \
+	'Entire screen' \
+	'Choose specific window' \
+	'Focused window' \
+	| rofi -dmenu -i -p 'Screenshot')
 
-Option=$(printf '%s\n' "${Options[@]}" | rofi -dmenu -i -p 'Screenshot')
-
-[[ -z "$Option" ]] && exit
+test -z "$Choice" && exit
 
 Screenshot() {
 	scrot "$@" -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/'
 }
 
-case "$Option" in
+case "$Choice" in
 	'Entire screen')
 		Screenshot ;;
 	'Choose specific window')

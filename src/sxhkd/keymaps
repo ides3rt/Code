@@ -1,11 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-while read; do
-	[[ $REPLY =~ xkb_symbols ]] && break
-done <<< "$(setxkbmap -print)"
+while read CurLine; do
+	case "$CurLine" in
+		*xkb_symbols*)
+			break ;;
+	esac
+done <<-EOF
+	`setxkbmap -print`
+EOF
 
-read F1 F2 F3 F4 _ <<< "$REPLY"
-IFS='+' read F1 F2 _ <<< "$F4"
+read F1 F2 F3 F4 _ <<-EOF
+	$CurLine
+EOF
+
+IFS='+' read F1 F2 _ <<-EOF
+	$F4
+EOF
 
 case "$F2" in
 	us*)
