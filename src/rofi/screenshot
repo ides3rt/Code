@@ -1,22 +1,22 @@
 #!/bin/sh
 
 Choice=$(printf '%s\n' \
-	'Entire screen' \
-	'Choose specific window' \
-	'Focused window' \
+	'Full-screen' \
+	'Focused-window' \
+	'Choose-specific-area/window' \
 	| rofi -dmenu -i -p 'Screenshot')
 
 test -z "$Choice" && exit
 
 Screenshot() {
-	scrot "$@" -q 100 '%Y-%m-%d_%H:%M:%S.png' -e 'mv $f ~/Pictures/'
+	maim "$@" $HOME/Pictures/$(date +%Y-%m-%d_%H:%M:%S).png
 }
 
 case "$Choice" in
-	'Entire screen')
+	'Full-screen')
 		Screenshot ;;
-	'Choose specific window')
+	'Focused-window')
+		Screenshot -i $(xdotool getactivewindow) ;;
+	'Choose-specific-area/window')
 		Screenshot -s ;;
-	'Focused window')
-		Screenshot -u ;;
 esac
