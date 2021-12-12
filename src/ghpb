@@ -15,9 +15,9 @@ GistBak="$BakDir/gists"
 	{ printf '%s\n' "ERR: $BakDir doesn't exists.." 1>&2; exit 1 ;}
 
 Repositories=(
-	'Code' 'config' 'Documents' 'doasedit'
-	'dotfiles' 'firefox' 'gists' 'librewolf'
-	'Pictures' 'exit'
+	'Code' 'colemak-dhk' 'config' 'Documents'
+	'doasedit' 'dotfiles' 'firefox' 'gists'
+	'librewolf' 'Pictures' 'exit'
 )
 
 Count=${#Repositories[@]}
