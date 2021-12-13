@@ -1,7 +1,7 @@
 #!/bin/sh
 
-while read CurLine; do
-	case "$CurLine" in
+while read Curline; do
+	case "$Curline" in
 		*xkb_symbols*)
 			break ;;
 	esac
@@ -10,7 +10,7 @@ done <<-EOF
 EOF
 
 read F1 F2 F3 F4 _ <<-EOF
-	$CurLine
+	$Curline
 EOF
 
 IFS='+' read F1 F2 _ <<-EOF
@@ -19,9 +19,10 @@ EOF
 
 case "$F2" in
 	us*)
-		setxkbmap th ;;
+		setxkbmap th -option shift:both_capslock
+		xmodmap -e 'clear Lock' ;;
 	*)
-		setxkbmap us -variant colemak_dh \
-			-option ctrl:nocaps \
-			-option shift:both_capslock ;;
+		setxkbmap us -option shift:both_capslock
+		xmodmap $XDG_CONFIG_HOME/X11/xmodmap/colemak-dhk.xmodmap ;;
 esac
+xmodmap -e 'keycode 66 = Control_L' -e 'add Control = Control_L'
