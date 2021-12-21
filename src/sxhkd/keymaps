@@ -25,4 +25,6 @@ case "$F2" in
 		setxkbmap us -option shift:both_capslock
 		xmodmap $XDG_CONFIG_HOME/X11/xmodmap/colemak-dhk.xmodmap ;;
 esac
+
 xmodmap -e 'keycode 66 = Control_L' -e 'add Control = Control_L'
+xcape -e 'Control_L=Escape'
