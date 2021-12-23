@@ -2,17 +2,19 @@
 
 trap 'sync' EXIT
 
-BakDir=/media/ides3rt/USB1p2/GitHub
-GitDir="$HOME/GitHub"
+Program="${0##*/}"
 
-RepoDir="$GitDir/repositories"
-GistDir="$GitDir/gists"
+Err() {
+	printf '%s\n' "Err: $2" 1>&2
+	(( $1 > 0 )) && exit $1
+}
 
-RepoBak="$BakDir/repositories"
-GistBak="$BakDir/gists"
+(( $# > 0 )) && Err 1 "$Program() doesn't accept argument..."
 
-[[ -d "$BakDir" ]] ||
-	{ printf '%s\n' "ERR: $BakDir doesn't exists.." 1>&2; exit 1 ;}
+Bakdir="/media/$USER/USB1p2/GitHub"
+Gitdir="$HOME/GitHub"
+
+[[ -d $Bakdir ]] || Err 1 "'$Bakdir' doesn't exists..."
 
 Repositories=(
 	'Code' 'colemak-dhk' 'config' 'Documents'
@@ -31,21 +33,20 @@ select Repository in ${Repositories[@]}; do
 			exit 0 ;;
 
 		gists)
-			cp $GistDir/* $GistBak/ ;;
+			cp -r $Gitdir/gists/* $Bakdir/gists/ ;;
 
 		*)
-			DlDir="$RepoBak/$Repository"
-			[[ -d "$DlDir" ]] && rm -rf $DlDir
+			Destdir="$Bakdir/repositories/$Repository"
+			[[ -d $Destdir ]] && rm -rf "$Destdir"
 
 			URL="https://github.com/ides3rt/$Repository"
+			Repodir="$Gitdir/repositories/$Repository"
 
-			if [[ -d $RepoDir/$Repository ]]; then
-				cp -r $RepoDir/$Repository $RepoBak/$Repository
+			if [[ -d $Repodir ]]; then
+				cp -r "$Repodir" "$Destdir"
 			else
-				printf '%s\n' \
-					" \`$RepoDir/$Repository\` doesn't exists use \`git clone\` instead"
-				git clone -q "$URL" "$DlDir" ||
-					printf '%s\n' "$Repository doesn't exists..."
+				Err 0 "'$Repodir' doesn't exists use \`git clone\` instead..."
+				git clone -q "$URL" "$Destdir" || Err 0 "'$Repository' doesn't exists..."
 			fi ;;
 	esac
 done

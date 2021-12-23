@@ -2,24 +2,25 @@
 
 trap 'sync' EXIT
 
-Yes=0
-Force=0
+Yes=0 Force=0
+
+Program="${0##*/}"
 
 Usage() {
 	while read -r REPLY; do
 		printf '%b\n' "$REPLY"
 	done <<-EOF
-		\rUsage: rst [OPTIONS]
+		\rUsage: $Program [OPTIONS]
 
 		\r  -h, --help      - Displays this help information.
-		\r  -f, --force     - Allows \`root\` to run rst().
-		\r  -y, --yes       - Answers \`Yes\` to all questions.
+		\r  -f, --force     - Allows 'root' to run $Program().
+		\r  -y, --yes       - Answers 'yes' to all questions.
 
 	EOF
 }
 
-ERR() {
-	printf '%s\n' "ERR: $2" 1>&2
+Err() {
+	printf '%s\n' "Err: $2" 1>&2
 	test $1 -gt 0 && exit $1
 }
 
@@ -35,13 +36,13 @@ while test "$1"; do
 			Yes=1 ;;
 
 		*)
-			ERR 1 "unknown option(s) $1..." ;;
+			Err 1 "unknown option(s) $1..." ;;
 	esac
 	shift
 done
 
 if test `id -u` -eq 0 -a $Force -eq 0; then
-	ERR 1 'denied to run rst() as root...'
+	Err 1 "denied to run $Program() as root..."
 fi
 
 Ask() {
@@ -57,29 +58,29 @@ Ask() {
 				break ;;
 
 			*)
-				ERR 0 'Invaild answer(s)...' ;;
+				Err 0 'Invaild answer(s)...' ;;
 		esac
 	done
 	shift
 	test "$Answer" = Yes && rm -rf "$@"
 }
 
-for CacheDir in $HOME/.cache/?*; do
-	test -e "$CacheDir" || unset CacheDir
+for Cachedir in $HOME/.cache/?*; do
+	test -e "$Cachedir" || unset -v Cachedir
 	break
 done
 
-test -n "$CacheDir" && Ask cache $HOME/.cache/*
+test -n "$Cachedir" && Ask cache $HOME/.cache/*
 
 FFDir="$HOME/.mozilla/firefox"
-FFCrash="$FFDir/Crash Reports"; FFPings="$FFDir/Pending Pings"
+FFCrash="$FFDir/Crash Reports" FFPings="$FFDir/Pending Pings"
 
 if test -d "$FFCrash" -o -d "$FFPings"; then
 	Ask "firefox's reports" "$FFCrash" "$FFPings"
 fi
 
-viminfo="$HOME/.viminfo"; vimnetr="$HOME/.vim/.netrwhist"
+Viminfo="$HOME/.viminfo" Vimnetr="$HOME/.vim/.netrwhist"
 
-if test -f "$viminfo" -o -f "$vimnetr"; then
-	Ask "vim's cache" "$viminfo" "$vimnetr"
+if test -f "$Viminfo" -o -f "$Vimnetr"; then
+	Ask "vim's cache" "$Viminfo" "$Vimnetr"
 fi
