@@ -65,12 +65,12 @@ Ask() {
 	test "$Answer" = Yes && rm -rf "$@"
 }
 
-for Cachedir in $HOME/.cache/?*; do
+for Cachedir in "$HOME"/.cache/?*; do
 	test -e "$Cachedir" || unset -v Cachedir
 	break
 done
 
-test -n "$Cachedir" && Ask cache $HOME/.cache/*
+test -n "$Cachedir" && Ask cache "$HOME"/.cache/*
 
 FFDir="$HOME/.mozilla/firefox"
 FFCrash="$FFDir/Crash Reports" FFPings="$FFDir/Pending Pings"
