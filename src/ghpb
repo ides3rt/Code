@@ -19,7 +19,7 @@ Gitdir="$HOME/GitHub"
 Repositories=(
 	'Code' 'colemak-dhk' 'config' 'Documents'
 	'doasedit' 'dotfiles' 'firefox' 'gists'
-	'librewolf' 'Pictures' 'exit'
+	'librewolf' 'Monofur' 'Pictures' 'exit'
 )
 
 Count=${#Repositories[@]}
