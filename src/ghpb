@@ -11,8 +11,8 @@ Err() {
 
 (( $# > 0 )) && Err 1 "$Program() doesn't accept argument..."
 
-Bakdir="/media/$USER/USB1p2/GitHub"
-Gitdir="$HOME/GitHub"
+Bakdir=/media/"$USER"/USB1p2/GitHub
+Gitdir="$HOME"/GitHub
 
 [[ -d $Bakdir ]] || Err 1 "'$Bakdir' doesn't exists..."
 
@@ -33,7 +33,7 @@ select Repository in "${Repositories[@]}"; do
 			exit 0 ;;
 
 		gists)
-			cp -r $Gitdir/gists/* $Bakdir/gists/ ;;
+			cp -r "$Gitdir"/gists/* "$Bakdir"/gists/ ;;
 
 		*)
 			Destdir="$Bakdir/repositories/$Repository"

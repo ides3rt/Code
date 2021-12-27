@@ -1,20 +1,26 @@
 #!/bin/sh
 
-File="$HOME/.local/share/dictionary"
+File="$HOME"/.local/share/dictionary
 
-test -f "$File" || printf '' > $File
+test -f "$File" || printf '' > "$File"
 
-Word=$(while read -r CurLine; do printf '%s\n' "${CurLine% -*}"; done < $File \
-	| rofi -dmenu -i -p 'Word')
+findword() {
+	while read Curline; do
+		printf '%s\n' "${CurLine% -*}"
+	done < "$File"
+	unset -v Curline
+}
 
-test -z "$Word" && exit
+Word=$(findword | rofi -dmenu -i -p 'Word')
+
+test -z "$Word" && exit 0
 
 if test -z "$(grep -io "^$Word" $File)"; then
 
 	Meaning=$(rofi -dmenu -p 'Meaning')
-	test -z "$Meaning" && exit
+	test -z "$Meaning" && exit 0
 
-	echo "$Word - $Meaning" >> $File
+	echo "$Word - $Meaning" >> "$File"
 else
-	grep -i "^$Word" $File | rofi -dmenu -i -p 'Matching'
+	grep -i "^$Word" "$File" | rofi -dmenu -i -p 'Matching'
 fi

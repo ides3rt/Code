@@ -2,8 +2,8 @@
 
 pactl set-sink-volume @DEFAULT_SINK@ "$@"
 
-read F1 F2 F3 F4 F5 _ <<-EOF
+read F1 F2 F3 F4 Volume _ <<-EOF
 	`pactl get-sink-volume @DEFAULT_SINK@`
 EOF
 
-dunstify "Volume: $F5"
+dunstify "Volume: $Volume"

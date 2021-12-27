@@ -6,17 +6,17 @@ Choice=$(printf '%s\n' \
 	'Choose-specific-area/window' \
 	| rofi -dmenu -i -p 'Screenshot')
 
-test -z "$Choice" && exit
+test -z "$Choice" && exit 0
 
 Screenshot() {
-	maim "$@" $HOME/Pictures/$(date +%Y-%m-%d_%H:%M:%S).png
+	maim "$@" "$HOME/Pictures/$(date +%Y-%m-%d_%H:%M:%S).png"
 }
 
 case "$Choice" in
 	'Full-screen')
 		Screenshot ;;
 	'Focused-window')
-		Screenshot -i $(xdotool getactivewindow) ;;
+		Screenshot -i "$(xdotool getactivewindow)" ;;
 	'Choose-specific-area/window')
 		Screenshot -s ;;
 esac

@@ -13,18 +13,19 @@ read F1 F2 F3 F4 _ <<-EOF
 	$Curline
 EOF
 
-IFS='+' read F1 F2 _ <<-EOF
+IFS='+' read F1 Keymap _ <<-EOF
 	$F4
 EOF
 
-case "$F2" in
+case "$Keymap" in
 	us*)
 		setxkbmap th -option shift:both_capslock
 		xmodmap -e 'clear Lock' ;;
 	*)
 		setxkbmap us -option shift:both_capslock
-		xmodmap $XDG_CONFIG_HOME/X11/xmodmap/colemak-dhk.xmodmap ;;
+		xmodmap "$XDG_CONFIG_HOME"/X11/xmodmap/colemak-dhk.xmodmap ;;
 esac
 
 xmodmap -e 'keycode 66 = Control_L' -e 'add Control = Control_L'
+killall xcape
 xcape -e 'Control_L=Escape'
