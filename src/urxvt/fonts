@@ -1,0 +1,19 @@
+#!/bin/sh
+
+File="$HOME"/.config/X11/Xresources
+
+while read Font; do
+	case "$Font" in
+		*'URxvt*.font'*)
+			break ;;
+	esac
+done < "$File"
+
+case "$Font" in
+	*'15.5'*)
+		sed -i '/URxvt\*\.font/ s/15\.5/20/' "$File" ;;
+	*'20'*)
+		sed -i '/URxvt\*\.font/ s/20/15\.5/' "$File" ;;
+esac
+
+xrdb "$File"
