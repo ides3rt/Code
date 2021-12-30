@@ -11,9 +11,9 @@ done < "$File"
 
 case "$Font" in
 	*'15.5'*)
-		sed -i '/URxvt\*\.font/ s/15\.5/20/' "$File" ;;
-	*'20'*)
-		sed -i '/URxvt\*\.font/ s/20/15\.5/' "$File" ;;
+		sed -i '/URxvt\*\.font/ s/15\.5/30\.5/' "$File" ;;
+	*'30.5'*)
+		sed -i '/URxvt\*\.font/ s/30\.5/15\.5/' "$File" ;;
 esac
 
 xrdb "$File"
