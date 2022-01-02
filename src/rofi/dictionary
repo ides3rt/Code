@@ -1,26 +1,24 @@
 #!/bin/sh
 
-File="$HOME"/.local/share/dictionary
+File="${XDG_DATA_DIR:-$HOME/.local/share}"/dictionary
 
 test -f "$File" || printf '' > "$File"
 
 findword() {
-	while read Curline; do
-		printf '%s\n' "${CurLine% -*}"
+	while IFS=' - ' read Curline _; do
+		printf '%s\n' "$Curline"
 	done < "$File"
-	unset -v Curline
+	unset -v Curline _
 }
 
 Word=$(findword | rofi -dmenu -i -p 'Word')
 
 test -z "$Word" && exit 0
 
-if test -z "$(grep -io "^$Word" $File)"; then
-
-	Meaning=$(rofi -dmenu -p 'Meaning')
-	test -z "$Meaning" && exit 0
-
-	echo "$Word - $Meaning" >> "$File"
+if grep -io ^"$Word" "$File" >/dev/null 2>&1; then
+	grep -i ^"$Word" "$File" | rofi -dmenu -i -p 'Matching'
 else
-	grep -i "^$Word" "$File" | rofi -dmenu -i -p 'Matching'
+	Meaning=$(rofi -dmenu -i -p 'Meaning')
+	test -z "$Meaning" && exit 0
+	printf '%s\n' "$Word - $Meaning" >> "$File"
 fi

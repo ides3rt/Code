@@ -2,7 +2,7 @@
 
 if test -z "$1"; then
 	pactl set-sink-mute @DEFAULT_SINK@ toggle
-	case $(pactl get-sink-mute @DEFAULT_SINK@) in
+	case `pactl get-sink-mute @DEFAULT_SINK@` in
 		*no) Volume=Unmuted ;;
 		*yes) Volume=Muted ;;
 	esac
