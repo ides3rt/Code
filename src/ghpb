@@ -5,11 +5,20 @@ trap 'sync' EXIT
 Program="${0##*/}"
 
 Err() {
-	printf '%s\n' "Err: $2" 1>&2
+	printf '%s\n' "$Program: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
 (( $# > 0 )) && Err 1 "$Program() doesn't accept argument..."
+
+for Dep in git rm cp; {
+	if ! type -P $Dep &>/dev/null; then
+		Err 0 "$Dep(1) not found..."
+		(( MissingDeps++ ))
+	fi
+}
+
+(( MissingDeps )) && Err 1 "$MissingDeps dep(s) was missing..."
 
 Bakdir=/media/"$USER"/USB1p2/GitHub
 Gitdir="$HOME"/GitHub
