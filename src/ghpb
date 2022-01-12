@@ -26,9 +26,9 @@ Gitdir="$HOME"/GitHub
 [[ -d $Bakdir ]] || Err 1 "'$Bakdir' doesn't exists..."
 
 Repositories=(
-	'Code' 'colemak-dhk' 'config' 'Documents'
+	'Code' 'colemak-dhk' 'extras' 'setup'
 	'doasedit' 'dotfiles' 'firefox' 'gists'
-	'librewolf' 'Monofur' 'Pictures' 'exit'
+	'Monofur' 'exit'
 )
 
 Count=${#Repositories[@]}
