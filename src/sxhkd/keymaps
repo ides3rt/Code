@@ -9,12 +9,8 @@ done <<-EOF
 	`setxkbmap -print`
 EOF
 
-read F1 F2 F3 F4 _ <<-EOF
-	$Curline
-EOF
-
 IFS='+' read F1 Keymap _ <<-EOF
-	$F4
+	$Curline
 EOF
 
 case "$Keymap" in
