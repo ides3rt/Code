@@ -11,7 +11,7 @@ Usage() {
 		\rUsage: $Program [OPTIONS]
 
 		\r  -h, --help      - Displays this help information.
-		\r  -f, --force     - Allows 'root' to run $Program().
+		\r  -f, --force     - Allows 'root' to run $Program(1).
 		\r  -y, --yes       - Answers 'yes' to all questions.
 
 	EOF
@@ -41,7 +41,7 @@ while test "$1"; do
 done
 
 if test "$USER" = root -a "$Force" != True; then
-	Err 1 "denied to run $Program() as root..."
+	Err 1 "denied to run $Program(1) as root..."
 fi
 
 Ask() {
@@ -64,7 +64,7 @@ Ask() {
 	test "$Answer" = Yes && rm -rf "$@"
 }
 
-for Cachedir in "$HOME"/.cache/?*; do
+for Cachedir in "$HOME"/.cache/*; do
 	test -e "$Cachedir" || unset -v Cachedir
 	break
 done
