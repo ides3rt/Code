@@ -15,15 +15,8 @@ EOF
 
 case "$Keymap" in
 	us*)
-		setxkbmap th -option shift:both_capslock
-		xmodmap -e 'clear Lock' \
-			-e 'keycode 66 = Control_L' \
-			-e 'add Control = Control_L' ;;
+		setxkbmap th
+		xmodmap -e 'clear Lock' -e 'keycode 66 = Escape' ;;
 	*)
-		setxkbmap us -variant colemak_dhk \
-			-option ctrl:nocaps \
-			-option shift:both_capslock ;;
+		setxkbmap us -variant grammak_iso ;;
 esac
-
-killall xcape
-xcape -e 'Control_L=Escape'
