@@ -16,7 +16,9 @@ EOF
 case "$Keymap" in
 	us*)
 		setxkbmap th
-		xmodmap -e 'clear Lock' -e 'keycode 66 = Escape' ;;
+		xmodmap -e 'clear Lock' -e 'keycode 66 = Escape'
+		dunstify -u low -r 71 'Keymap: th' ;;
 	*)
-		setxkbmap us -variant grammak_iso ;;
+		setxkbmap us -variant grammak_iso
+		dunstify -u low -r 71 'Keymap: us(grammak_iso)' ;;
 esac

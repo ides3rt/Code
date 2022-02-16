@@ -8,15 +8,17 @@ findword() {
 	while IFS=' - ' read Curline _; do
 		printf '%s\n' "$Curline"
 	done < "$File"
-	unset -v Curline _
+	unset -v Curline
 }
 
 Word=$(findword | rofi -dmenu -i -p 'Word')
 
 test -z "$Word" && exit 0
 
-if grep -io ^"$Word" "$File" >/dev/null 2>&1; then
-	grep -i ^"$Word" "$File" | rofi -dmenu -i -p 'Matching'
+List=$(grep -i ^"$Word" "$File")
+
+if test -n "$List"; then
+	printf '%s\n' "$List" | rofi -dmenu -i -p 'Matching'
 else
 	Meaning=$(rofi -dmenu -i -p 'Meaning')
 	test -z "$Meaning" && exit 0

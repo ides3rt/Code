@@ -13,4 +13,4 @@ else
 	EOF
 fi
 
-dunstify "Volume: $Volume"
+dunstify -u low -r 101 "Volume: $Volume"
