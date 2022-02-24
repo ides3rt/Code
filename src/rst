@@ -64,22 +64,28 @@ Ask() {
 	test "$Answer" = Yes && rm -rf "$@"
 }
 
-for Cachedir in "$HOME"/.cache/*; do
-	test -e "$Cachedir" || unset -v Cachedir
+for CacheDir in "$HOME"/.cache/*; do
+	test -e "$CacheDir" || unset -v CacheDir
 	break
 done
 
-test -n "$Cachedir" && Ask cache "$HOME"/.cache/*
+test -n "$CacheDir" && Ask cache "$HOME"/.cache/*
 
 FFDir="$HOME"/.mozilla/firefox
 FFCrash="$FFDir/Crash Reports" FFPings="$FFDir/Pending Pings"
 
 if test -d "$FFCrash" -o -d "$FFPings"; then
-	Ask "firefox's reports" "$FFCrash" "$FFPings"
+	Ask "Firefox's reports" "$FFCrash" "$FFPings"
 fi
 
-Viminfo="$HOME"/.viminfo Vimnetr="$HOME"/.vim/.netrwhist
+VimInfo="$HOME"/.viminfo VimNetR="$HOME"/.vim/.netrwhist
 
-if test -f "$Viminfo" -o -f "$Vimnetr"; then
-	Ask "vim's cache" "$Viminfo" "$Vimnetr"
+if test -f "$VimInfo" -o -f "$VimNetR"; then
+	Ask "Vim's cache" "$VimInfo" "$VimNetR"
+fi
+
+NvimShada="${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/shada/main.shada
+
+if test -f "$NvimShada"; then
+	Ask "Neovim's cache" "$NvimShada"
 fi
