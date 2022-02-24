@@ -13,8 +13,8 @@ Err() {
 
 type -P git &>/dev/null || Err 1 'git(1) is required...'
 
-Bakdir=/media/"$USER"/USB1p2/GitHub
-Gitdir="$HOME"/GitHub
+Bakdir=/media/"$USER"/USB1p2/GitHub/ides3rt
+Gitdir="$HOME"/GitHub/ides3rt
 
 [[ -d $Bakdir ]] || Err 1 "'$Bakdir' doesn't exists..."
 
@@ -45,11 +45,11 @@ select Repository in "${Repositories[@]}"; do
 			cp -r "$Gitdir"/gists/* "$Bakdir"/gists/ ;;
 
 		*)
-			Destdir="$Bakdir/repositories/$Repository"
+			Destdir="$Bakdir/projects/$Repository"
 			[[ -d $Destdir ]] && rm -rf "$Destdir"
 
-			URL="https://github.com/ides3rt/$Repository"
-			Repodir="$Gitdir/repositories/$Repository"
+			URL=https://github.com/ides3rt/"$Repository"
+			Repodir="$Gitdir/projects/$Repository"
 
 			if [[ -d $Repodir ]]; then
 				cp -r "$Repodir" "$Destdir"
