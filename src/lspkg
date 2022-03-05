@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+Program="${0##*/}"
+
+Usage() {
+	read -d '' <<-EOF
+		Usage: $Program [OPTIONS] [GLOB]
+
+		  -h, --help        - Display this help infomation.
+		  -r, --raw         - Show tarball's full name.
+		  -d, --dups        - Only show duplicate tarball(s).
+
+	EOF
+
+	printf '%s' "$REPLY"
+}
+
+Err() {
+	printf '%s\n' "$Program: $2" 1>&2
+	(( $1 > 0 )) && exit $1
+}
+
+while [[ -n $1 ]]; do
+	case "$1" in
+		-h|--help)
+			Usage; exit 0 ;;
+
+		-r|--raw)
+			Raw=1 ;;
+
+		-d|--dups)
+			Dups=1 ;;
+
+		--)
+			shift
+			break ;;
+
+		-*)
+			Err 2 "$1: invaild option..." ;;
+
+		*)
+			break ;;
+	esac
+	shift
+done
+
+Count=1
+
+for File in /var/cache/pacman/pkg/$1*.tar.zst; {
+	[[ -f $File ]] || exit 1
+
+	SFile="${File#/var/cache/pacman/pkg/}"
+	SFile="${SFile/-[0-9]*}"
+
+	if [[ $SFile == $Old_SFile ]]; then
+
+		(( Count++ ))
+		if (( Dups == 1 && Raw == 1 )); then
+			Msg="${Old_File:-$File}"
+			(( Count > 1 )) && printf '%s\n' "$Msg"
+		fi
+
+	else
+		if (( Raw == 1 )); then
+			Msg="${Old_File:-$File}"
+		else
+			Msg="${Old_SFile:-$SFile} - has $Count tarball(s)."
+		fi
+
+		if (( Dups == 1 )); then
+			(( Count > 1 )) && printf '%s\n' "$Msg"
+		else
+			printf '%s\n' "$Msg"
+		fi
+
+		Count=1
+	fi
+
+	Old_SFile="$SFile"
+	Old_File="$File"
+}
