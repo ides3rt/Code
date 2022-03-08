@@ -32,8 +32,8 @@ Kernel="root=UUID=$Mapper ro"
 # Specify the initrd files.
 Kernel+=" initrd=\\$CPU-ucode.img initrd=\\initramfs-linux-hardened.img"
 
-# Quiet.
-Kernel+=' quiet loglevel=0'
+# Only show kernel errors.
+Kernel+=' quiet loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=auto'
 
 # Enable Apparmor.
 Kernel+=' lsm=landlock,lockdown,yama,apparmor,bpf'
@@ -113,8 +113,11 @@ Kernel+=' intel_pstate=disable'
 # Disable annoying OEM logo.
 Kernel+=' bgrt_disable'
 
-# Speed improvement.
-Kernel+=' libahci.ignore_sss=1 zswap.enabled=0'
+# Disable SSS as it meant for enterprise.
+Kernel+=' libahci.ignore_sss=1'
+
+# Disable ZSwap as we enabled ZRam already.
+Kernel+=' zswap.enabled=0'
 
 # Install bootloader to UEFI.
 efibootmgr --disk "$Disk" --part 1 --create \
