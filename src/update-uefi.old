@@ -30,10 +30,12 @@ Mapper=$(findmnt -no UUID /)
 Kernel="root=UUID=$Mapper ro"
 
 # Specify the initrd files.
+#
+# Must be commented out if mkinitcpio(8) is in used.
 Kernel+=" initrd=\\$CPU-ucode.img initrd=\\initramfs-linux-hardened.img"
 
-# Only show kernel errors.
-Kernel+=' quiet loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=auto'
+# Don't show kernel messages.
+Kernel+=' quiet loglevel=0 rd.udev.log_level=0 rd.systemd.show_status=false'
 
 # Enable Apparmor.
 Kernel+=' lsm=landlock,lockdown,yama,apparmor,bpf'
@@ -84,8 +86,8 @@ Kernel+=' slub_debug=FZ'
 # Zero memory at allocation and free time.
 Kernel+=' init_on_alloc=1 init_on_free=1'
 
-# Makes the kernel panic on uncorrectable errors in ECC memory that an attacker
-# could exploit.
+# Makes the kernel panic on uncorrectable errors
+# in ECC memory that an attacker could exploit.
 Kernel+=' mce=0'
 
 # Enable Kernel Page Table Isolation.
@@ -113,8 +115,11 @@ Kernel+=' intel_pstate=disable'
 # Disable annoying OEM logo.
 Kernel+=' bgrt_disable'
 
-# Disable SSS as it meant for enterprise.
+# Disable SSS as it meant for server usage.
 Kernel+=' libahci.ignore_sss=1'
+
+# Disable Watchdog as it meant for server usage.
+Kernel+=' modprobe.blacklist=iTCO_wdt nowatchdog'
 
 # Disable ZSwap as we enabled ZRam already.
 Kernel+=' zswap.enabled=0'
