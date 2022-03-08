@@ -124,7 +124,7 @@ Kernel+=' modprobe.blacklist=iTCO_wdt nowatchdog'
 # Remove console cursor blinking.
 #
 # Also, I don't recommended this if you're using disk encryption
-# on rootfs, unless you've keyfile.
+# on rootfs, unless you've a keyfile.
 #Kernel+=' vt.global_cursor_default=0'
 
 # Disable ZSwap as we enabled ZRam already.
