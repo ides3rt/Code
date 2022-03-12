@@ -16,42 +16,43 @@ Selected=$(printf '%s\n' "${Options[@]}" | rmenu)
 
 case "$Selected" in
 	"${Options[0]}")
-		Target=$(realpath .)
+		Target="$PWD"
 
 		while :; do
-			Selected=$({ echo ..; ls -ANp1 --group-directories-first "$Target"; } | rmenu)
+			Selected=$({ echo ..; ls -ANp1 --group-directories-first -- "$Target"; } | rmenu)
 			[[ -z $Selected ]] && exit 0
 
 			if [[ $Selected == /* ]]; then
 				NewTarget="$Selected"
 			else
-				NewTarget=$(realpath "${Target%%/}/$Selected")
+				NewTarget=$(realpath -- "${Target%%/}/$Selected")
 			fi
 
-			if [[ ! -d $NewTarget ]]; then
+			if [[ -f $NewTarget ]]; then
 				if ! URL=$(curl -sF file=@"$NewTarget" https://0x0.st); then
-					dunstify -u critical 'Error:' 'Failed to Upload'
+					dunstify -u critical -- 'Error:' 'Failed to Upload to https://0x0.st'
+					exit 1
 				fi
 
-				printf "$URL" | xclip -sel c
-				printf "$URL" | xclip -sel p
+				printf '%s' "$URL" | xclip -sel c
+				printf '%s' "$URL" | xclip -sel p
 
-				dunstify -u low 'File Uploaded' "URL: $URL"
+				dunstify -u low -- 'File Uploaded' "URL: $URL"
 
 				echo "$(printf '%(%F_%T)T') $URL ${NewTarget##*/}" >> "$Log"
 
 				exit 0
 			fi
 
-			[[ -e $NewTarget ]] && Target="$NewTarget"
+			[[ -d $NewTarget ]] && Target="$NewTarget"
 		done ;;
 
 	"${Options[1]}")
-		read -a URL <<< "$(column -t "$Log" | tac | rmenu)"
+		read -a URL <<< "$(column -t -- "$Log" | tac | rmenu)"
 		[[ -z $URL ]] && exit 0
 
-		printf "${URL[1]}" | xclip -sel c
-		printf "${URL[1]}" | xclip -sel p
+		printf '%s' "${URL[1]}" | xclip -sel c
+		printf '%s' "${URL[1]}" | xclip -sel p
 
-		dunstify -u low 'Copied to Cilpboard' "URL: ${URL[1]}" ;;
+		dunstify -u low -- 'Copied to Clipboard' "URL: ${URL[1]}" ;;
 esac
