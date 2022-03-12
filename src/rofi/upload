@@ -29,7 +29,9 @@ case "$Selected" in
 			fi
 
 			if [[ ! -d $NewTarget ]]; then
-				URL=$(curl -sF file=@"$NewTarget" https://0x0.st)
+				if ! URL=$(curl -sF file=@"$NewTarget" https://0x0.st); then
+					dunstify -u critical 'Error:' 'Failed to Upload'
+				fi
 
 				printf "$URL" | xclip -sel c
 				printf "$URL" | xclip -sel p
