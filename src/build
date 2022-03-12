@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+Program="${0##*/}"
+SRCDIR="${SRCDIR:-$HOME/.local/src}"
+
+[[ -d "$SRCDIR" ]] || mkdir -p -- "$SRCDIR"
+
+Usage() {
+	read -d '' <<-EOF
+		Usage: $Program [OPTION/AUR]
+		To remove the AUR, use \`pacman -Rns \$AUR\`.
+
+		  -h, --help        - Display this help infomation.
+		  -c, --check       - Check AUR's in \$SRCDIR, if up to date or not.
+
+	EOF
+
+	printf '%s' "$REPLY"
+	exit 0
+}
+
+Err() {
+	printf '%s\n' "$Program: $2" 1>&2
+	(( $1 > 0 )) && exit $1
+}
+
+((UID)) || Err 2 'rejected to run as root...'
+
+for Dep in git makepkg; {
+	if ! type -P "$Dep" &>/dev/null; then
+		Err 0 "dependency, \`$Dep\`, not met..."
+		(( DepErr++ ))
+	fi
+}
+
+(( DepErr )) && Err 1 "$DepErr dependency(s) missing, aborted..."
+unset -v DepErr
+
+[[ -z $1 ]] && Usage
+
+while [[ -n $1 ]]; do
+	case "$1" in
+		-h|--help)
+			Usage ;;
+
+		-c|--check)
+			for AUR in "$SRCDIR"/*/PKGBUILD; {
+				git -C "${AUR%/*}" pull -q
+			}
+
+			exit 0 ;;
+
+		--)
+			shift
+			break ;;
+
+		-*)
+			Err 2 "$1: invaild option..." ;;
+
+		*)
+			break ;;
+	esac
+	shift
+done
+
+(( $# > 1 )) && Err 2 "can't build multiple AUR's at a time..."
+
+if [[ -d $1 ]]; then
+	AUR="$1"
+else
+	URL=https://aur.archlinux.org/"$1"
+	AUR="$SRCDIR/$1"
+
+	if [[ -d $AUR ]]; then
+		git -C "$AUR" pull -q
+	else
+		Err 0 "'$1' not found use \`git clone\` instead..."
+		git clone -q "$URL" "$AUR" || Err 1 'failed to use `git clone`...'
+	fi
+
+	unset -v URL
+fi
+
+BuildDIR="${TMPDIR:-/tmp}/build-$(( $SRANDOM * $$ ))"
+
+cp -r -- "$AUR" "$BuildDIR" || Err 1 'failed to copy the AUR to temporary directory...'
+
+trap "rm -rf -- $BuildDIR; sync" EXIT
+
+(cd -- "$BuildDIR" && makepkg -sir) || Err 1 "failed to build '$1'..."

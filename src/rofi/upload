@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+rmenu() { rofi -dmenu -i -p 'Select'; }
+
+Log="${XDG_DATA_HOME:-$HOME/.local/share}"/0x0.log
+
+[[ -d $XDG_DATA_HOME ]] || mkdir -p -- "$XDG_DATA_HOME"
+[[ -f $Log ]] || > "$Log"
+
+Options=(
+	'Upload a File'
+	'Recent Upload(s)'
+)
+
+Selected=$(printf '%s\n' "${Options[@]}" | rmenu)
+
+case "$Selected" in
+	"${Options[0]}")
+		Target=$(realpath .)
+
+		while :; do
+			Selected=$({ echo ..; ls -ANp1 --group-directories-first "$Target"; } | rmenu)
+			[[ -z $Selected ]] && exit 0
+
+			if [[ $Selected == /* ]]; then
+				NewTarget="$Selected"
+			else
+				NewTarget=$(realpath "${Target%%/}/$Selected")
+			fi
+
+			if [[ ! -d $NewTarget ]]; then
+				URL=$(curl -sF file=@"$NewTarget" https://0x0.st)
+
+				printf "$URL" | xclip -sel c
+				printf "$URL" | xclip -sel p
+
+				dunstify -u low 'File Uploaded' "URL: $URL"
+
+				echo "$(printf '%(%F_%T)T') $URL ${NewTarget##*/}" >> "$Log"
+
+				exit 0
+			fi
+
+			[[ -e $NewTarget ]] && Target="$NewTarget"
+		done ;;
+
+	"${Options[1]}")
+		column "$Log" | rmenu ;;
+esac
