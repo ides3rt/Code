@@ -45,5 +45,11 @@ case "$Selected" in
 		done ;;
 
 	"${Options[1]}")
-		column "$Log" | rmenu ;;
+		read -a URL <<< "$(column -t "$Log" | tac | rmenu)"
+		[[ -z $URL ]] && exit 0
+
+		printf "${URL[1]}" | xclip -sel c
+		printf "${URL[1]}" | xclip -sel p
+
+		dunstify -u low 'Copied to Cilpboard' "URL: ${URL[1]}" ;;
 esac
