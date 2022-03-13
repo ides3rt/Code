@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rmenu() { rofi -dmenu -i "$@"; }
+dmenu() { rofi -dmenu "$@"; }
 
 File="${XDG_DATA_HOME:-$HOME/.local/share}"/dictionary
 
@@ -13,16 +13,16 @@ findword() {
 	unset -v Curline
 }
 
-Word=$(findword | rmenu -p 'Word')
+Word=$(findword | dmenu -i -p 'Word')
 
 test -z "$Word" && exit 0
 
 List=$(grep -i ^"$Word" "$File")
 
 if test -n "$List"; then
-	echo "$List" | rmenu -p 'Matching'
+	echo "$List" | dmenu -i -p 'Matching'
 else
-	Meaning=$(rmenu -p 'Meaning')
+	Meaning=$(dmenu -i -p 'Meaning')
 	test -z "$Meaning" && exit 0
 	echo "$Word - $Meaning" >> "$File"
 fi

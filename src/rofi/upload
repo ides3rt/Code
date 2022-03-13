@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-rmenu() { rofi -dmenu -i -p 'Select'; }
+# Dependencies:
+#   coreutils (bash, ls)
+#   curl (To upload to 0x0)
+#   dmenu/rofi
+#   xclip (Clipboard support)
+#   dunst (dunstify)
+#   notify-send (dunstify)
+
+if ! type -P dmenu &>/dev/null; then
+	dmenu() { rofi -dmenu "$@"; }
+fi
 
 Log="${XDG_DATA_HOME:-$HOME/.local/share}"/0x0.log
 
@@ -12,25 +22,29 @@ Options=(
 	'Recent Upload(s)'
 )
 
-Selected=$(printf '%s\n' "${Options[@]}" | rmenu)
+Selected=$(printf '%s\n' "${Options[@]}" | dmenu -i -p 'Select')
 
-case "$Selected" in
-	"${Options[0]}")
-		Target="$PWD"
+case $Selected in
+	${Options[0]})
+		ls() {
+			echo ..
+			command ls -ALNpX1 --group-directories-first "$@"
+		}
 
 		while :; do
-			Selected=$({ echo ..; ls -ANp1 --group-directories-first -- "$Target"; } | rmenu)
+			Target="$PWD"
+
+			Selected=$(ls | dmenu -i -p "$Target")
 			[[ -z $Selected ]] && exit 0
 
-			if [[ $Selected == /* ]]; then
-				NewTarget="$Selected"
-			else
-				NewTarget=$(realpath -- "${Target%%/}/$Selected")
-			fi
+			if [[ -f $Selected ]]; then
+				if ! [[ -O $Selected ]]; then
+					dunstify -u normal -- 'Error:' 'The File not Own by You'
+					exit 1
+				fi
 
-			if [[ -f $NewTarget ]]; then
-				if ! URL=$(curl -sF file=@"$NewTarget" https://0x0.st); then
-					dunstify -u critical -- 'Error:' 'Failed to Upload to https://0x0.st'
+				if ! URL=$(curl -sF file=@"$Selected" https://0x0.st); then
+					dunstify -u critical -- 'Error:' 'Failed to Upload'
 					exit 1
 				fi
 
@@ -38,21 +52,25 @@ case "$Selected" in
 				printf '%s' "$URL" | xclip -sel p
 
 				dunstify -u low -- 'File Uploaded' "URL: $URL"
-
-				echo "$(printf '%(%F_%T)T') $URL ${NewTarget##*/}" >> "$Log"
+				echo "$(printf '%(%F_%T)T') $URL $Selected" >> "$Log"
 
 				exit 0
+			elif [[ -d $Selected ]]; then
+				if ! cd -- "$Selected"; then
+					dunstify -u normal -- 'Error:' 'The Directory not Readable'
+				fi
+			else
+				dunstify -u normal -- 'Error:' 'Wrong File Type'
+				exit 1
 			fi
-
-			[[ -d $NewTarget ]] && Target="$NewTarget"
 		done ;;
 
-	"${Options[1]}")
-		read -a URL <<< "$(column -t -- "$Log" | tac | rmenu)"
+	${Options[1]})
+		read F1 URL _ <<< "$(dmenu -i -p 'Select' < "$Log")"
 		[[ -z $URL ]] && exit 0
 
-		printf '%s' "${URL[1]}" | xclip -sel c
-		printf '%s' "${URL[1]}" | xclip -sel p
+		printf '%s' "$URL" | xclip -sel c
+		printf '%s' "$URL" | xclip -sel p
 
-		dunstify -u low -- 'Copied to Clipboard' "URL: ${URL[1]}" ;;
+		dunstify -u low -- 'Copied to Clipboard' "URL: $URL" ;;
 esac

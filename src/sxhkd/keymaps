@@ -1,7 +1,7 @@
 #!/bin/sh
 
 while read Curline; do
-	case "$Curline" in
+	case $Curline in
 		*xkb_symbols*)
 			break ;;
 	esac
@@ -13,7 +13,7 @@ IFS='+' read F1 Keymap _ <<-EOF
 	$Curline
 EOF
 
-case "$Keymap" in
+case $Keymap in
 	us*)
 		setxkbmap th
 		dunstify -u low -r 71 'Keymap: th' ;;

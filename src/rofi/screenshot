@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rmenu() { rofi -dmenu -i -p 'Screenshot'; }
+dmenu() { rofi -dmenu "$@"; }
 
 Options=(
 	'Full Screen'
@@ -8,7 +8,7 @@ Options=(
 	'Choose Specific Area/Window'
 )
 
-[[ -z $Choice ]] && Choice=$(printf '%s\n' "${Options[@]}" | rmenu)
+Choice=$(printf '%s\n' "${Options[@]}" | dmenu -i -p 'Screenshot')
 
 [[ -z $Choice ]] && exit 0
 
@@ -21,13 +21,13 @@ ss() {
 	fi
 }
 
-case "$Choice" in
-	"${Options[0]}")
+case $Choice in
+	${Options[0]})
 		ss ;;
 
-	"${Options[1]}")
+	${Options[1]})
 		ss -i "$(xdotool getactivewindow)" ;;
 
-	"${Options[2]}")
+	${Options[2]})
 		ss -s ;;
 esac

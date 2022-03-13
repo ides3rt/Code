@@ -39,7 +39,7 @@ PS3="Select your repository [1-$Count]: "
 
 select Repository in "${Repositories[@]}"; do
 	[[ -z $Repository ]] && continue
-	case "$Repository" in
+	case $Repository in
 		exit)
 			exit 0 ;;
 

@@ -2,8 +2,8 @@
 
 # Detect CPU.
 while read VendorID; do
-	if [[ "$VendorID" == *vendor_id* ]]; then
-		case "$VendorID" in
+	if [[ $VendorID == *vendor_id* ]]; then
+		case $VendorID in
 			*AMD*)
 				CPU=amd ;;
 			*Intel*)

@@ -42,7 +42,7 @@ if [[ -z $1 ]]; then
 fi
 
 while [[ -n $1 ]]; do
-	case "$1" in
+	case $1 in
 		-h|--help)
 			Usage
 			exit 0 ;;
