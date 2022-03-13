@@ -11,7 +11,7 @@ Err() {
 
 (( $# > 0 )) && Err 2 "$Program(1) needn't argument..."
 
-if type -P git &>/dev/null; then
+if ! type -P git &>/dev/null; then
 	Err 2 'dependency, `git`, not met...'
 fi
 
