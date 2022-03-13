@@ -109,9 +109,6 @@ Kernel+=' extra_latent_entropy'
 # Restrict access to debugfs.
 Kernel+=' debugfs=off'
 
-# Disable Intel P-State.
-Kernel+=' intel_pstate=disable'
-
 # Disable annoying OEM logo.
 Kernel+=' bgrt_disable'
 
