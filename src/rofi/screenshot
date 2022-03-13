@@ -1,24 +1,33 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-Choice=$(printf '%s\n' \
-	'Full screen' \
-	'Focused window' \
-	'Choose specific area/window' \
-	| rofi -dmenu -i -p 'Screenshot')
+rmenu() { rofi -dmenu -i -p 'Screenshot'; }
 
-test -z "$Choice" && exit 0
+Options=(
+	'Full Screen'
+	'Focused Window'
+	'Choose Specific Area/Window'
+)
+
+[[ -z $Choice ]] && Choice=$(printf '%s\n' "${Options[@]}" | rmenu)
+
+[[ -z $Choice ]] && exit 0
 
 ss() {
-	local Dest="$HOME/Pictures/$(date +%Y-%m-%d_%H:%M:%S).png"
-	maim "$@" "$Dest"
-	dunstify -u low -i "$Dest" 'Screenshot done...'
+	local Dest="$HOME/Pictures/$(printf '%(%F_%T)T').png"
+	if maim "$@" "$Dest"; then
+		dunstify -u low -i "$Dest" 'Captured Successfully...'
+	else
+		dunstify -u low 'Failed to Capture...'
+	fi
 }
 
 case "$Choice" in
-	'Full-screen')
+	"${Options[0]}")
 		ss ;;
-	'Focused-window')
+
+	"${Options[1]}")
 		ss -i "$(xdotool getactivewindow)" ;;
-	'Choose-specific-area/window')
+
+	"${Options[2]}")
 		ss -s ;;
 esac

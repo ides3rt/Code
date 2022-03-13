@@ -1,91 +1,100 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 trap 'sync' EXIT
 
 Program="${0##*/}"
 
 Usage() {
-	while read -r Curline; do
-		printf '%b\n' "$Curline"
-	done <<-EOF
-		\rUsage: $Program [OPTIONS]
+	read -d '' <<-EOF
+		Usage: $Program [OPTION]...
 
-		\r  -h, --help      - Displays this help information.
-		\r  -f, --force     - Allows 'root' to run $Program(1).
-		\r  -y, --yes       - Answers 'yes' to all questions.
+		  -h, --help      - Displays this help information.
+		  -f, --force     - Allow 'root' to run $Program(1).
+		  -y, --yes       - Answers 'yes' to all questions.
 
 	EOF
-	unset -v Curline
+
+	printf '%s' "$REPLY"
 }
 
 Err() {
 	printf '%s\n' "$Program: $2" 1>&2
-	test $1 -gt 0 && exit $1
+	(( $1 > 0 )) && exit $1
 }
 
-while test "$1"; do
+while [[ -n $1 ]]; do
 	case "$1" in
 		-h|--help)
-			Usage; exit 0 ;;
+			Usage
+			exit 0 ;;
 
 		-f|--force)
-			Force=True ;;
+			Force=1 ;;
 
 		-y|--yes)
-			Yes=True ;;
+			Yes=1 ;;
 
 		*)
-			Err 1 "unknown option(s) $1..." ;;
+			Err 2 "$1: invaild option..." ;;
 	esac
 	shift
 done
 
-if test "$USER" = root -a "$Force" != True; then
-	Err 1 "denied to run $Program(1) as root..."
+if (( ! UID && Force != 1 )); then
+	Err 1 'denied to run as root...'
 fi
 
 Ask() {
-	local Answer=Yes
-	while test "$Yes" != True; do
-		read -p "Do you want to clear $1? [Y/n]: " REPLY
-		case "$REPLY" in
-			[Yy][Ee][Ss]|[Yy]|'')
+	local Clear=1
+	until (( Yes == 1 )); do
+		read -p "Do you want to clear $1? [Y/n]: "
+		case "${REPLY,,}" in
+			yes|y|'')
 				break ;;
 
-			[Nn][Oo]|[Nn])
-				local Answer=No
+			no|n)
+				Clear=0
 				break ;;
 
 			*)
-				Err 0 'Invaild answer(s)...' ;;
+				Err 0 "$REPLY: invaild reply..." ;;
 		esac
 	done
 	shift
-	test "$Answer" = Yes && rm -rf "$@"
+	(( Clear == 1 )) && rm -rf -- "$@"
 }
 
-for CacheDir in "$HOME"/.cache/*; do
-	test -e "$CacheDir" || unset -v CacheDir
+for Cache in "$HOME"/.cache/*; {
+	[[ -e $Cache ]] || unset -v Cache
 	break
-done
+}
 
-test -n "$CacheDir" && Ask cache "$HOME"/.cache/*
+if [[ -n $Cache ]]; then
+	Ask cache "$HOME"/.cache/*
+	unset -v Cache
+fi
 
 FFDir="$HOME"/.mozilla/firefox
 FFCrash="$FFDir/Crash Reports" FFPings="$FFDir/Pending Pings"
 
-if test -d "$FFCrash" -o -d "$FFPings"; then
+if [[ -d $FFCrash || -d $FFPings ]]; then
 	Ask "Firefox's reports" "$FFCrash" "$FFPings"
 fi
 
+unset -v FFDir FFCrash FFPings
+
 VimInfo="$HOME"/.viminfo VimNetR="$HOME"/.vim/.netrwhist
 
-if test -f "$VimInfo" -o -f "$VimNetR"; then
+if [[ -f $VimInfo || -f $VimNetR ]]; then
 	Ask "Vim's cache" "$VimInfo" "$VimNetR"
 fi
 
-NvimShada="${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/shada/main.shada
+unset -v VimInfo VimNetR
 
-if test -f "$NvimShada"; then
+NVimShada="${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/shada/main.shada
+
+if [[ -f $NVimShada ]]; then
 	Ask "Neovim's cache" "$NvimShada"
 fi
+
+unset -v NVimShada

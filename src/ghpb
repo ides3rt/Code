@@ -9,14 +9,16 @@ Err() {
 	(( $1 > 0 )) && exit $1
 }
 
-(( $# > 0 )) && Err 1 "$Program(1) doesn't accept argument..."
+(( $# > 0 )) && Err 2 "$Program(1) needn't argument..."
 
-type -P git &>/dev/null || Err 1 'git(1) is required...'
+if type -P git &>/dev/null; then
+	Err 2 'dependency, `git`, not met...'
+fi
 
-Bakdir=/media/"$USER"/USB1p2/GitHub/ides3rt
-Gitdir="$HOME"/GitHub/ides3rt
+GitDIR="$HOME"/GitHub/ides3rt
+BackDIR=/media/"$USER"/USB1p2/GitHub/ides3rt
 
-[[ -d $Bakdir ]] || Err 1 "'$Bakdir' doesn't exists..."
+[[ -d $BackDIR ]] || Err 2 "$BackDIR: not a directory..."
 
 Repositories=(
 	Code
@@ -42,20 +44,23 @@ select Repository in "${Repositories[@]}"; do
 			exit 0 ;;
 
 		gists)
-			cp -r "$Gitdir"/gists/* "$Bakdir"/gists/ ;;
+			cp -r -- "$GitDIR"/gists/* "$BackDIR"/gists/ ;;
 
 		*)
-			Destdir="$Bakdir/projects/$Repository"
-			[[ -d $Destdir ]] && rm -rf "$Destdir"
+			DestDIR="$BackDIR/projects/$Repository"
+			[[ -d $DestDIR ]] && rm -rf "$DestDIR"
 
 			URL=https://github.com/ides3rt/"$Repository"
-			Repodir="$Gitdir/projects/$Repository"
+			Repodir="$GitDIR/projects/$Repository"
 
 			if [[ -d $Repodir ]]; then
-				cp -r "$Repodir" "$Destdir"
+				cp -r -- "$Repodir" "$DestDIR"
 			else
-				Err 0 "'$Repodir' doesn't exists use \`git clone\` instead..."
-				git clone -q "$URL" "$Destdir" || Err 0 "'$Repository' doesn't exists..."
+				Err 0 "$Repodir: not found, use \`git clone\` instead..."
+
+				if git clone -q "$URL" "$DestDIR"; then
+					Err 0 "$Repository: not found..."
+				fi
 			fi ;;
 	esac
 done

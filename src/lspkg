@@ -8,7 +8,7 @@ Usage() {
 
 		  -h, --help        - Display this help infomation.
 		  -r, --raw         - Show tarball's full name.
-		  -d, --dups        - Only show duplicate tarball(s).
+		  -d, --dups        - Only show duplicate tarballs.
 
 	EOF
 
@@ -23,7 +23,8 @@ Err() {
 while [[ -n $1 ]]; do
 	case "$1" in
 		-h|--help)
-			Usage; exit 0 ;;
+			Usage
+			exit 0 ;;
 
 		-r|--raw)
 			Raw=1 ;;

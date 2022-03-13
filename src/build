@@ -16,7 +16,6 @@ Usage() {
 	EOF
 
 	printf '%s' "$REPLY"
-	exit 0
 }
 
 Err() {
@@ -24,7 +23,7 @@ Err() {
 	(( $1 > 0 )) && exit $1
 }
 
-((UID)) || Err 2 'rejected to run as root...'
+((UID)) || Err 2 'denied to run as root...'
 
 for Dep in git makepkg; {
 	if ! type -P "$Dep" &>/dev/null; then
@@ -36,12 +35,17 @@ for Dep in git makepkg; {
 (( DepErr )) && Err 1 "$DepErr dependency(s) missing, aborted..."
 unset -v DepErr
 
-[[ -z $1 ]] && Usage
+if [[ -z $1 ]]; then
+	Err 0 'no argument were given...'
+	printf '%s\n' "See \`$Program --help\` for usage." 1>&2
+	exit 2
+fi
 
 while [[ -n $1 ]]; do
 	case "$1" in
 		-h|--help)
-			Usage ;;
+			Usage
+			exit 0 ;;
 
 		-c|--check)
 			for AUR in "$SRCDIR"/*/PKGBUILD; {
