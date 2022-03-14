@@ -1,28 +1,19 @@
 #!/usr/bin/env bash
 
 File="${XDG_CONFIG_HOME:-$HOME/.config}"/X11/Xresources
-Content=$(< "$File")
 
-while read Font; do
-	[[ "$Font" == 'URxvt*.font:'* ]] && break
+while read; do
+	case $REPLY in
+		'URxvt*.font: '*15.5*)
+			Data+=("${REPLY/15.5/30.5}") ;;
+
+		'URxvt*.font: '*30.5*)
+			Data+=("${REPLY/30.5/15.5}") ;;
+
+		*)
+			Data+=("$REPLY") ;;
+	esac
 done < "$File"
 
-case $Font in
-	*15.5*)
-		while read; do
-			if [[ $REPLY == 'URxvt*.font:'* ]]; then
-				REPLY="${REPLY/15.5/30.5}"
-			fi
-			printf '%s\n' "$REPLY"
-		done <<< "$Content" > "$File" ;;
-
-	*30.5*)
-		while read; do
-			if [[ $REPLY == 'URxvt*.font:'* ]]; then
-				REPLY="${REPLY/30.5/15.5}"
-			fi
-			printf '%s\n' "$REPLY"
-		done <<< "$Content" > "$File" ;;
-esac
-
+printf '%s\n' "${Data[@]}" > "$File"
 xrdb "$File"

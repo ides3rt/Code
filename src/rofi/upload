@@ -66,7 +66,7 @@ case $Selected in
 		done ;;
 
 	${Options[1]})
-		read F1 URL _ <<< "$(dmenu -i -p 'Select' < "$Log")"
+		read _ URL _ <<< "$(dmenu -i -p 'Select' < "$Log")"
 		[[ -z $URL ]] && exit 0
 
 		printf '%s' "$URL" | xclip -sel c

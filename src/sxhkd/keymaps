@@ -9,7 +9,7 @@ done <<-EOF
 	`setxkbmap -print`
 EOF
 
-IFS='+' read F1 Keymap _ <<-EOF
+IFS='+' read _ Keymap _ <<-EOF
 	$Curline
 EOF
 

@@ -8,7 +8,7 @@ if test -z "$1"; then
 	esac
 else
 	pactl set-sink-volume @DEFAULT_SINK@ "$@"
-	read F1 F2 F3 F4 Volume _ <<-EOF
+	read _ _ _ _ Volume _ <<-EOF
 		`pactl get-sink-volume @DEFAULT_SINK@`
 	EOF
 fi
