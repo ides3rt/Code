@@ -2,12 +2,12 @@
 
 File="${XDG_CONFIG_HOME:-$HOME/.config}"/X11/Xresources
 
-while read; do
+while read -r; do
 	case $REPLY in
-		'URxvt*.font: '*15.5*)
+		*size=15.5*)
 			Data+=("${REPLY/15.5/30.5}") ;;
 
-		'URxvt*.font: '*30.5*)
+		*size=30.5*)
 			Data+=("${REPLY/30.5/15.5}") ;;
 
 		*)
