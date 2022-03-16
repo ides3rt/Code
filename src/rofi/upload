@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Dependencies:
+# Dependencies):
 #   coreutils (bash, ls)
-#   curl (To upload to 0x0)
-#   dmenu/rofi
+#   curl (Upload utility)
+#   dmenu/rofi (Default run menu)
 #   xclip (Clipboard support)
 #   dunst (dunstify)
 #   notify-send (dunstify)
@@ -32,17 +32,10 @@ case $Selected in
 		}
 
 		while :; do
-			Target="$PWD"
-
-			Selected=$(ls | dmenu -i -p "$Target")
+			Selected=$(ls | dmenu -i -p "$PWD")
 			[[ -z $Selected ]] && exit 0
 
 			if [[ -f $Selected ]]; then
-				if ! [[ -O $Selected ]]; then
-					dunstify -u normal -- 'Error:' 'The File not Own by You'
-					exit 1
-				fi
-
 				if ! URL=$(curl -sF file=@"$Selected" https://0x0.st); then
 					dunstify -u critical -- 'Error:' 'Failed to Upload'
 					exit 1
@@ -66,7 +59,11 @@ case $Selected in
 		done ;;
 
 	${Options[1]})
-		read _ URL _ <<< "$(dmenu -i -p 'Select' < "$Log")"
+		while read -r; do
+			Data=("$REPLY" "${Data[@]}")
+		done < "$Log"
+
+		read _ URL _ <<< "$(printf '%s\n' "${Data[@]}" | dmenu -i -p 'Select')"
 		[[ -z $URL ]] && exit 0
 
 		printf '%s' "$URL" | xclip -sel c
