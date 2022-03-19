@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-Disk=$(lsblk -nso PATH "$(findmnt -nvo SOURCE /)" | tail -n 1)
+disk=$(lsblk -nso PATH "$(findmnt -nvo SOURCE /)" | tail -n 1)
 
 if [[ $Disk == *nvme* ]]; then
-	Disk="${Disk/p*}"
+	disk=${disk%p*}
 else
-	Disk="${Disk/[1-9]*}"
+	disk=${disk%%[1-9]}
 fi
 
-efibootmgr --disk "$Disk" --part 1 --create \
+efibootmgr --disk "$disk" --part 1 --create \
 	--label 'Arch Linux' \
 	--loader '\EFI\ARCHX64\linux-hardened.efi'

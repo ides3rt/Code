@@ -12,44 +12,44 @@ if ! type -P dmenu &>/dev/null; then
 	dmenu() { rofi -dmenu "$@"; }
 fi
 
-Log="${XDG_DATA_HOME:-$HOME/.local/share}"/0x0.log
+log=${XDG_DATA_HOME:-$HOME/.local/share}/0x0.log
 
 [[ -d $XDG_DATA_HOME ]] || mkdir -p -- "$XDG_DATA_HOME"
-[[ -f $Log ]] || > "$Log"
+[[ -f $log ]] || > "$log"
 
-Options=(
+entry=(
 	'Upload a File'
 	'Recent Upload(s)'
 )
 
-Selected=$(printf '%s\n' "${Options[@]}" | dmenu -i -p 'Select')
+select=$(printf '%s\n' "${entry[@]}" | dmenu -i -p 'Select')
 
-case $Selected in
-	${Options[0]})
-		ls() {
+case $select in
+	${entry[0]})
+		list() {
 			echo ..
-			command ls -ALNpX1 --group-directories-first "$@"
+			command ls -ALNpX1 --group-directories-first
 		}
 
 		while :; do
-			Selected=$(ls | dmenu -i -p "$PWD")
-			[[ -z $Selected ]] && exit 0
+			select=$(list | dmenu -i -p "$PWD")
+			[[ -z $select ]] && exit 0
 
-			if [[ -f $Selected ]]; then
-				if ! URL=$(curl -sF file=@"$Selected" https://0x0.st); then
+			if [[ -f $select ]]; then
+				if ! url=$(curl -sF file=@"$select" https://0x0.st); then
 					dunstify -u critical -- 'Error:' 'Failed to Upload'
 					exit 1
 				fi
 
-				printf '%s' "$URL" | xclip -sel c
-				printf '%s' "$URL" | xclip -sel p
+				printf '%s' "$url" | xclip -sel c
+				printf '%s' "$url" | xclip -sel p
 
-				dunstify -u low -- 'File Uploaded' "URL: $URL"
-				echo "$(printf '%(%F_%T)T') $URL $Selected" >> "$Log"
+				dunstify -u low -- 'File Uploaded' "URL: $url"
+				echo "$(printf '%(%F_%T)T') $url $select" >> "$log"
 
 				exit 0
-			elif [[ -d $Selected ]]; then
-				if ! cd -- "$Selected"; then
+			elif [[ -d $select ]]; then
+				if ! cd -- "$select"; then
 					dunstify -u normal -- 'Error:' 'The Directory not Readable'
 				fi
 			else
@@ -58,16 +58,16 @@ case $Selected in
 			fi
 		done ;;
 
-	${Options[1]})
+	${entry[1]})
 		while read -r; do
-			Data=("$REPLY" "${Data[@]}")
-		done < "$Log"
+			data=("$REPLY" "${data[@]}")
+		done < "$log"
 
-		read _ URL _ <<< "$(printf '%s\n' "${Data[@]}" | dmenu -i -p 'Select')"
-		[[ -z $URL ]] && exit 0
+		read _ url _ <<< "$(printf '%s\n' "${data[@]}" | dmenu -i -p 'Select')"
+		[[ -z $url ]] && exit 0
 
-		printf '%s' "$URL" | xclip -sel c
-		printf '%s' "$URL" | xclip -sel p
+		printf '%s' "$url" | xclip -sel c
+		printf '%s' "$url" | xclip -sel p
 
-		dunstify -u low -- 'Copied to Clipboard' "URL: $URL" ;;
+		dunstify -u low -- 'Copied to Clipboard' "URL: $url" ;;
 esac

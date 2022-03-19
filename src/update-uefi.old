@@ -1,38 +1,37 @@
 #!/usr/bin/env bash
 
 # Detect CPU.
-while read VendorID; do
-	if [[ $VendorID == *vendor_id* ]]; then
-		case $VendorID in
+while read; do
+	if [[ $REPLY == *vendor_id* ]]; then
+		case $REPLY in
 			*AMD*)
-				CPU=amd ;;
+				cpu=amd ;;
 			*Intel*)
-				CPU=intel ;;
+				cpu=intel ;;
 		esac
 		break
 	fi
 done < /proc/cpuinfo
-unset -v VendorID
 
-Disk=$(lsblk -nso PATH "$(findmnt -nvo SOURCE /)" | tail -n 1)
+disk=$(lsblk -nso PATH "$(findmnt -nvo SOURCE /)" | tail -n 1)
 
-if [[ $Disk == *nvme* ]]; then
-	Disk="${Disk/p*}"; P=p
+if [[ $disk == *nvme* ]]; then
+	disk=${disk%p*}; p=p
 else
-	Disk="${Disk/[1-9]*}"
+	disk=${disk%%[1-9]}
 fi
 
 # Find the rootfs UUID.
-System=$(lsblk -dno UUID "$Disk$P"2)
-Mapper=$(findmnt -no UUID /)
+system=$(lsblk -dno UUID "$disk$p"2)
+mapper=$(findmnt -no UUID /)
 
 # Specify the rootfs.
-Kernel="root=UUID=$Mapper ro"
+kernel="root=UUID=$mapper ro"
 
 # Specify the initrd files.
 #
 # Must be commented out if mkinitcpio(8) is in used.
-Kernel+=" initrd=\\$CPU-ucode.img initrd=\\initramfs-linux-hardened.img"
+Kernel+=" initrd=\\$cpu-ucode.img initrd=\\initramfs-linux-hardened.img"
 
 # Don't show kernel messages.
 Kernel+=' quiet loglevel=0 rd.udev.log_level=0 rd.systemd.show_status=false'
@@ -128,7 +127,7 @@ Kernel+=' modprobe.blacklist=iTCO_wdt nowatchdog'
 Kernel+=' zswap.enabled=0'
 
 # Install bootloader to UEFI.
-efibootmgr --disk "$Disk" --part 1 --create \
+efibootmgr --disk "$disk" --part 1 --create \
 	--label 'Arch Linux' \
 	--loader '\vmlinuz-linux-hardened' \
-	--unicode "$Kernel"
+	--unicode "$kernel"

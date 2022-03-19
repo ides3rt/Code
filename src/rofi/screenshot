@@ -2,32 +2,33 @@
 
 dmenu() { rofi -dmenu "$@"; }
 
-Options=(
+entry=(
 	'Full Screen'
 	'Focused Window'
 	'Choose Specific Area/Window'
 )
 
-Choice=$(printf '%s\n' "${Options[@]}" | dmenu -i -p 'Screenshot')
+select=$(printf '%s\n' "${entry[@]}" | dmenu -i -p 'Screenshot')
 
-[[ -z $Choice ]] && exit 0
+[[ -z $select ]] && exit 0
 
 ss() {
-	local Dest="$HOME/Pictures/$(printf '%(%F_%T)T').png"
-	if maim "$@" "$Dest"; then
-		dunstify -u low -i "$Dest" 'Captured Successfully...'
+	local dest=$HOME/Pictures/$(printf '%(%F_%T)T').png
+
+	if maim "$@" "$dest"; then
+		dunstify -u low -i "$dest" 'Captured Successfully...'
 	else
 		dunstify -u low 'Failed to Capture...'
 	fi
 }
 
-case $Choice in
-	${Options[0]})
+case $select in
+	${entry[0]})
 		ss ;;
 
-	${Options[1]})
+	${entry[1]})
 		ss -i "$(xdotool getactivewindow)" ;;
 
-	${Options[2]})
+	${entry[2]})
 		ss -s ;;
 esac

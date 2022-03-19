@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-File="${XDG_CONFIG_HOME:-$HOME/.config}"/X11/Xresources
+file=${XDG_CONFIG_HOME:-$HOME/.config}/X11/Xresources
 
 while read -r; do
 	case $REPLY in
 		*size=15.5*)
-			Data+=("${REPLY/15.5/30.5}") ;;
+			data+=("${REPLY/15.5/30.5}") ;;
 
 		*size=30.5*)
-			Data+=("${REPLY/30.5/15.5}") ;;
+			data+=("${REPLY/30.5/15.5}") ;;
 
 		*)
-			Data+=("$REPLY") ;;
+			data+=("$REPLY") ;;
 	esac
-done < "$File"
+done < "$file"
 
-printf '%s\n' "${Data[@]}" > "$File"
-xrdb "$File"
+printf '%s\n' "${data[@]}" > "$file"
+xrdb "$file"

@@ -2,58 +2,54 @@
 
 trap 'sync' EXIT
 
-Program="${0##*/}"
-
-Usage() {
-	read -d '' <<-EOF
-		Usage: $Program [OPTION]...
-
-		  -h, --help      - Displays this help information.
-		  -f, --force     - Allow 'root' to run $Program(1).
-		  -y, --yes       - Answers 'yes' to all questions.
-
-	EOF
-
-	printf '%s' "$REPLY"
-}
+progrm=${0##*/}
 
 Err() {
-	printf '%s\n' "$Program: $2" 1>&2
+	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
 while [[ -n $1 ]]; do
 	case $1 in
 		-h|--help)
-			Usage
+			read -d '' <<-EOF
+				Usage: $progrm [OPTION]...
+
+				  -h, --help      - Displays this help information.
+				  -f, --force     - Allow 'root' to run $progrm(1).
+				  -y, --yes       - Answers 'yes' to all questions.
+
+			EOF
+
+			printf '%s' "$REPLY"
 			exit 0 ;;
 
 		-f|--force)
-			Force=1 ;;
+			force=true ;;
 
 		-y|--yes)
-			Yes=1 ;;
+			yes=true ;;
 
 		*)
-			Err 2 "$1: invaild option..." ;;
+			Err 1 "$1: invaild option..." ;;
 	esac
 	shift
 done
 
-if (( ! UID && Force != 1 )); then
+if [[ $UID -eq 0 && -z $force ]]; then
 	Err 1 'denied to run as root...'
 fi
 
 Ask() {
-	local Clear=1
-	until (( Yes == 1 )); do
+	local clear=true
+	until [[ $yes == true ]]; do
 		read -p "Do you want to clear $1? [Y/n]: "
-		case "${REPLY,,}" in
+		case ${REPLY,,} in
 			yes|y|'')
 				break ;;
 
 			no|n)
-				Clear=0
+				unset -v clear
 				break ;;
 
 			*)
@@ -61,40 +57,40 @@ Ask() {
 		esac
 	done
 	shift
-	(( Clear == 1 )) && rm -rf -- "$@"
+	[[ $clear == true ]] && rm -rf -- "$@"
 }
 
-for Cache in "$HOME"/.cache/*; {
-	[[ -e $Cache ]] || unset -v Cache
+for cache in "$HOME"/.cache/*; {
+	[[ -e $cache ]] || unset -v cache
 	break
 }
 
-if [[ -n $Cache ]]; then
+if [[ $cache ]]; then
 	Ask cache "$HOME"/.cache/*
-	unset -v Cache
+	unset -v cache
 fi
 
-FFDir="$HOME"/.mozilla/firefox
-FFCrash="$FFDir/Crash Reports" FFPings="$FFDir/Pending Pings"
+ff_dir=$HOME/.mozilla/firefox
+ff_crash=$ff_dir/Crash\ Reports ff_ping=$ff_dir/Pending\ Pings
 
-if [[ -d $FFCrash || -d $FFPings ]]; then
-	Ask "Firefox's reports" "$FFCrash" "$FFPings"
+if [[ -d $ff_crash || -d $ff_ping ]]; then
+	Ask "Firefox's reports" "$ff_crash" "$ff_ping"
 fi
 
-unset -v FFDir FFCrash FFPings
+unset -v ff_dir ff_crash ff_ping
 
-VimInfo="$HOME"/.viminfo VimNetR="$HOME"/.vim/.netrwhist
+vim_info=$HOME/.viminfo vim_netr=$HOME/.vim/.netrwhist
 
-if [[ -f $VimInfo || -f $VimNetR ]]; then
-	Ask "Vim's cache" "$VimInfo" "$VimNetR"
+if [[ -f $vim_info || -f $vim_netr ]]; then
+	Ask "Vim's cache" "$vim_info" "$vim_netr"
 fi
 
-unset -v VimInfo VimNetR
+unset -v vim_info vim_netr
 
-NVimShada="${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/shada/main.shada
+nvim_shada=${XDG_DATA_HOME:-$HOME/.local/share}/nvim/shada/main.shada
 
-if [[ -f $NVimShada ]]; then
-	Ask "Neovim's cache" "$NvimShada"
+if [[ -f $nvim_shada ]]; then
+	Ask "Neovim's cache" "$nvim_shada"
 fi
 
-unset -v NVimShada
+unset -v nvim_shada

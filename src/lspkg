@@ -1,43 +1,39 @@
 #!/usr/bin/env bash
 
-Program="${0##*/}"
-
-Usage() {
-	read -d '' <<-EOF
-		Usage: $Program [OPTIONS] [GLOB]
-
-		  -h, --help        - Display this help infomation.
-		  -r, --raw         - Show tarball's full name.
-		  -d, --dups        - Only show duplicate tarballs.
-
-	EOF
-
-	printf '%s' "$REPLY"
-}
+progrm=${0##*/}
 
 Err() {
-	printf '%s\n' "$Program: $2" 1>&2
+	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
 while [[ -n $1 ]]; do
 	case $1 in
 		-h|--help)
-			Usage
+			read -d '' <<-EOF
+				Usage: $progrm [OPTIONS] [GLOB]
+
+				  -h, --help        - Display this help infomation.
+				  -r, --raw         - Show tarball's full name.
+				  -d, --dups        - Only show duplicate tarballs.
+
+			EOF
+
+			printf '%s' "$REPLY"
 			exit 0 ;;
 
 		-r|--raw)
-			Raw=1 ;;
+			raw=true ;;
 
 		-d|--dups)
-			Dups=1 ;;
+			dups=true ;;
 
 		--)
 			shift
 			break ;;
 
 		-*)
-			Err 2 "$1: invaild option..." ;;
+			Err 1 "$1: invaild option..." ;;
 
 		*)
 			break ;;
@@ -45,38 +41,36 @@ while [[ -n $1 ]]; do
 	shift
 done
 
-Count=1
+count=1
 
-for File in /var/cache/pacman/pkg/$1*.tar.zst; {
-	[[ -f $File ]] || exit 1
+for file in /var/cache/pacman/pkg/"$1"*.tar.zst; {
+	[[ -f $file ]] || exit 1
 
-	SFile="${File#/var/cache/pacman/pkg/}"
-	SFile="${SFile/-[0-9]*}"
+	name=${file#/var/cache/pacman/pkg/}
+	name=${name/-[0-9]*}
 
-	if [[ $SFile == $Old_SFile ]]; then
-
-		(( Count++ ))
-		if (( Dups == 1 && Raw == 1 )); then
-			Msg="${Old_File:-$File}"
-			(( Count > 1 )) && printf '%s\n' "$Msg"
+	if [[ $name == $old_name ]]; then
+		(( count++ ))
+		if [[ $dups == true && $raw == true ]]; then
+			msg=${old_file:-$file}
+			(( count > 1 )) && printf '%s\n' "$msg"
 		fi
-
 	else
-		if (( Raw == 1 )); then
-			Msg="${Old_File:-$File}"
+		if [[ $raw == true ]]; then
+			msg=${old_file:-$file}
 		else
-			Msg="${Old_SFile:-$SFile} - has $Count tarball(s)."
+			msg="${old_name:-$name} - has $count tarball(s)."
 		fi
 
-		if (( Dups == 1 )); then
-			(( Count > 1 )) && printf '%s\n' "$Msg"
+		if [[ $dups == true ]]; then
+			(( Count > 1 )) && printf '%s\n' "$msg"
 		else
-			printf '%s\n' "$Msg"
+			printf '%s\n' "$msg"
 		fi
 
-		Count=1
+		count=1
 	fi
 
-	Old_SFile="$SFile"
-	Old_File="$File"
+	old_file=$file
+	old_name=$name
 }

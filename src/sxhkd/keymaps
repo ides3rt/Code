@@ -1,7 +1,7 @@
 #!/bin/sh
 
-while read Curline; do
-	case $Curline in
+while read line; do
+	case $line in
 		*xkb_symbols*)
 			break ;;
 	esac
@@ -9,15 +9,15 @@ done <<-EOF
 	`setxkbmap -print`
 EOF
 
-IFS='+' read _ Keymap _ <<-EOF
-	$Curline
+IFS='+' read _ keymap _ <<-EOF
+	$line
 EOF
 
-case $Keymap in
+case $keymap in
 	us*)
 		setxkbmap th
 		dunstify -u low -r 71 'Keymap: th' ;;
 	*)
-		setxkbmap us -variant grammak_iso
+		setxkbmap us grammak_iso
 		dunstify -u low -r 71 'Keymap: us(grammak_iso)' ;;
 esac

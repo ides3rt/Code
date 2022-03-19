@@ -2,25 +2,25 @@
 
 trap 'sync' EXIT
 
-Program="${0##*/}"
+progrm=${0##*/}
 
 Err() {
-	printf '%s\n' "$Program: $2" 1>&2
+	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
-(( $# > 0 )) && Err 2 "$Program(1) needn't argument..."
+(( $# > 0 )) && Err 1 "$progrm(1) needn't argument..."
 
 if ! type -P git &>/dev/null; then
-	Err 2 'dependency, `git`, not met...'
+	Err 1 'dependency, `git`, not met...'
 fi
 
-GitDIR="$HOME"/GitHub/ides3rt
-BackDIR=/media/"$USER"/USB1p2/GitHub/ides3rt
+git_dir=$HOME/GitHub/ides3rt
+bak_dir=/media/$USER/USB1p2/GitHub/ides3rt
 
-[[ -d $BackDIR ]] || Err 2 "$BackDIR: not a directory..."
+[[ -d $bak_dir ]] || Err 1 "$bak_dir: not a directory..."
 
-Repositories=(
+repo_arr=(
 	Code
 	doasedit
 	dotfiles
@@ -33,33 +33,33 @@ Repositories=(
 	exit
 )
 
-Count=${#Repositories[@]}
+repo_nr=${#repo_arr[@]}
 
-PS3="Select your repository [1-$Count]: "
+PS3="Select your repository [1-$repo_nr]: "
 
-select Repository in "${Repositories[@]}"; do
-	[[ -z $Repository ]] && continue
-	case $Repository in
+select repo in "${repo_arr[@]}"; do
+	[[ -z $repo ]] && continue
+	case $repo in
 		exit)
 			exit 0 ;;
 
 		gists)
-			cp -r -- "$GitDIR"/gists/* "$BackDIR"/gists/ ;;
+			cp -r -- "$git_dir"/gists/* "$bak_dir"/gists/ ;;
 
 		*)
-			DestDIR="$BackDIR/projects/$Repository"
-			[[ -d $DestDIR ]] && rm -rf "$DestDIR"
+			dest_dir=$bak_dir/projects/$repo
+			[[ -d $dest_dir ]] && rm -rf -- "$dest_dir"
 
-			URL=https://github.com/ides3rt/"$Repository"
-			Repodir="$GitDIR/projects/$Repository"
+			url=https://github.com/ides3rt/$repo
+			repo_dir=$git_dir/projects/$repo
 
-			if [[ -d $Repodir ]]; then
-				cp -r -- "$Repodir" "$DestDIR"
+			if [[ -d $repo_dir ]]; then
+				cp -r -- "$repo_dir" "$dest_dir"
 			else
-				Err 0 "$Repodir: not found, use \`git clone\` instead..."
+				Err 0 "$repo_dir: not found, use \`git clone\` instead..."
 
-				if git clone -q "$URL" "$DestDIR"; then
-					Err 0 "$Repository: not found..."
+				if git clone -q "$url" "$dest_dir"; then
+					Err 0 "$repo: not found..."
 				fi
 			fi ;;
 	esac
