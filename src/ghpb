@@ -4,21 +4,21 @@ trap 'sync' EXIT
 
 progrm=${0##*/}
 
-Err() {
+panic() {
 	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
-(( $# > 0 )) && Err 1 "$progrm(1) needn't argument..."
+(( $# > 0 )) && panic 1 "$progrm(1) needn't argument..."
 
 if ! type -P git &>/dev/null; then
-	Err 1 'dependency, `git`, not met...'
+	panic 1 'dependency, `git`, not met...'
 fi
 
 git_dir=$HOME/GitHub/ides3rt
 bak_dir=/media/$USER/USB1p2/GitHub/ides3rt
 
-[[ -d $bak_dir ]] || Err 1 "$bak_dir: not a directory..."
+[[ -d $bak_dir ]] || panic 1 "$bak_dir: not a directory..."
 
 repo_arr=(
 	Code
@@ -56,10 +56,10 @@ select repo in "${repo_arr[@]}"; do
 			if [[ -d $repo_dir ]]; then
 				cp -r -- "$repo_dir" "$dest_dir"
 			else
-				Err 0 "$repo_dir: not found, use \`git clone\` instead..."
+				panic 0 "$repo_dir: not found, use \`git clone\` instead..."
 
 				if git clone -q "$url" "$dest_dir"; then
-					Err 0 "$repo: not found..."
+					panic 0 "$repo: not found..."
 				fi
 			fi ;;
 	esac

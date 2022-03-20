@@ -4,7 +4,7 @@ trap 'sync' EXIT
 
 progrm=${0##*/}
 
-Err() {
+panic() {
 	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
@@ -31,13 +31,13 @@ while [[ -n $1 ]]; do
 			yes=true ;;
 
 		*)
-			Err 1 "$1: invaild option..." ;;
+			panic 1 "$1: invaild option..." ;;
 	esac
 	shift
 done
 
 if [[ $UID -eq 0 && -z $force ]]; then
-	Err 1 'denied to run as root...'
+	panic 1 'denied to run as root...'
 fi
 
 Ask() {
@@ -53,7 +53,7 @@ Ask() {
 				break ;;
 
 			*)
-				Err 0 "$REPLY: invaild reply..." ;;
+				panic 0 "$REPLY: invaild reply..." ;;
 		esac
 	done
 	shift

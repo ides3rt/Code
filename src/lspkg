@@ -2,7 +2,7 @@
 
 progrm=${0##*/}
 
-Err() {
+panic() {
 	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
@@ -33,7 +33,7 @@ while [[ -n $1 ]]; do
 			break ;;
 
 		-*)
-			Err 1 "$1: invaild option..." ;;
+			panic 1 "$1: invaild option..." ;;
 
 		*)
 			break ;;

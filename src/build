@@ -3,27 +3,27 @@
 progrm=${0##*/}
 src_dir=$HOME/.local/src
 
-Err() {
+panic() {
 	printf '%s\n' "$progrm: $2" 1>&2
 	(( $1 > 0 )) && exit $1
 }
 
-((UID)) || Err 1 'denied to run as root...'
+((UID)) || panic 1 'denied to run as root...'
 
 for dep in git makepkg; {
 	if ! type -P "$dep" &>/dev/null; then
-		Err 0 "dependency, \`$Dep\`, not met..."
+		panic 0 "dependency, \`$Dep\`, not met..."
 		(( dep_err++ ))
 	fi
 }
 
-(( dep_err )) && Err 1 "$dep_err dependency(s) missing, aborted..."
+(( dep_err )) && panic 1 "$dep_err dependency(s) missing, aborted..."
 unset -v dep_err
 
 [[ -d $src_dir ]] || mkdir -p -- "$src_dir"
 
 if [[ -z $1 ]]; then
-	Err 0 'no argument were given...'
+	panic 0 'no argument were given...'
 	printf '%s\n' "See \`$progrm --help\` for usage." 1>&2
 	exit 1
 fi
@@ -60,7 +60,7 @@ while [[ -n $1 ]]; do
 			break ;;
 
 		-*)
-			Err 1 "$1: invaild option..." ;;
+			panic 1 "$1: invaild option..." ;;
 
 		*)
 			break ;;
@@ -68,7 +68,7 @@ while [[ -n $1 ]]; do
 	shift
 done
 
-(( $# > 1 )) && Err 1 "can't build multiple AUR's at a time..."
+(( $# > 1 )) && panic 1 "can't build multiple AUR's at a time..."
 
 if [[ -d $1 ]]; then
 	aur=$1
@@ -79,8 +79,8 @@ else
 	if [[ -d $aur ]]; then
 		git -C "$aur" pull -q
 	else
-		Err 0 "'$1' not found, use \`git clone\` instead..."
-		git clone -q "$url" "$aur" || Err 1 'failed to use `git clone`...'
+		panic 0 "'$1' not found, use \`git clone\` instead..."
+		git clone -q "$url" "$aur" || panic 1 'failed to use `git clone`...'
 	fi
 
 	unset -v url
@@ -88,8 +88,8 @@ fi
 
 temp_dir=${TMPDIR:-/tmp}/build-$SRANDOM
 
-cp -r -- "$aur" "$temp_dir" || Err 1 'failed to copy the AUR to temp directory...'
+cp -r -- "$aur" "$temp_dir" || panic 1 'failed to copy the AUR to temp directory...'
 
 trap "rm -rf -- $temp_dir; sync" EXIT
 
-(cd -- "$temp_dir" && makepkg -sir) || Err 1 "failed to build '$1'..."
+(cd -- "$temp_dir" && makepkg -sir) || panic 1 "failed to build '$1'..."
