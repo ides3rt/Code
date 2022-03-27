@@ -63,7 +63,7 @@ for file in /var/cache/pacman/pkg/"$1"*.tar.zst; {
 		fi
 
 		if [[ $dups == true ]]; then
-			(( Count > 1 )) && printf '%s\n' "$msg"
+			(( count > 1 )) && printf '%s\n' "$msg"
 		else
 			printf '%s\n' "$msg"
 		fi
