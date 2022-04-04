@@ -2,11 +2,13 @@
 
 trap 'sync' EXIT
 
-progrm=${0##*/}
+readonly progrm=${0##*/}
+
+eprintf() { printf "$@" 1>&2; }
 
 panic() {
-	printf '%s\n' "$progrm: $2" 1>&2
-	(( $1 > 0 )) && exit $1
+	eprintf '%s\n' "$progrm: $2"
+	(( $1 )) && exit $1
 }
 
 (( $# > 0 )) && panic 1 "$progrm(1) needn't argument..."
@@ -15,36 +17,29 @@ if ! type -P git &>/dev/null; then
 	panic 1 'dependency, `git`, not met...'
 fi
 
-git_dir=$HOME/GitHub/ides3rt
-bak_dir=/media/$USER/USB1p2/GitHub/ides3rt
+readonly git_dir=$HOME/GitHub/ides3rt
+readonly bak_dir=/media/$USER/USB1p2/GitHub/ides3rt
 
 [[ -d $bak_dir ]] || panic 1 "$bak_dir: not a directory..."
 
-repo_arr=(
-	Code
-	doasedit
-	dotfiles
-	extras
-	firefox
-	gists
-	grammak
-	Monofur
-	setup
-	exit
+readonly repo_arr=(
+	Code doasedit dotfiles
+	extras firefox gists
+	grammak Monofur setup
 )
 
-repo_nr=${#repo_arr[@]}
+readonly repo_nr=${#repo_arr[@]}
 
 PS3="Select your repository [1-$repo_nr]: "
 
-select repo in "${repo_arr[@]}"; do
-	[[ -z $repo ]] && continue
+select repo in "${repo_arr[@]}" exit; do
+	[[ $repo ]] || continue
 	case $repo in
 		exit)
 			exit 0 ;;
 
 		gists)
-			cp -r -- "$git_dir"/gists/* "$bak_dir"/gists/ ;;
+			cp -a -- "$git_dir"/gists/* "$bak_dir"/gists/ ;;
 
 		*)
 			dest_dir=$bak_dir/projects/$repo
@@ -54,11 +49,11 @@ select repo in "${repo_arr[@]}"; do
 			repo_dir=$git_dir/projects/$repo
 
 			if [[ -d $repo_dir ]]; then
-				cp -r -- "$repo_dir" "$dest_dir"
+				cp -a -- "$repo_dir" "$dest_dir"
 			else
 				panic 0 "$repo_dir: not found, use \`git clone\` instead..."
 
-				if git clone -q "$url" "$dest_dir"; then
+				if git clone -q -- "$url" "$dest_dir"; then
 					panic 0 "$repo: not found..."
 				fi
 			fi ;;

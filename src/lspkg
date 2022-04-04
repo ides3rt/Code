@@ -1,32 +1,37 @@
 #!/usr/bin/env bash
 
-progrm=${0##*/}
+readonly progrm=${0##*/}
+
+eprintf() { printf "$@" 1>&2; }
 
 panic() {
-	printf '%s\n' "$progrm: $2" 1>&2
-	(( $1 > 0 )) && exit $1
+	printf '%s\n' "$progrm: $2"
+	(( $1 )) && exit $1
 }
 
-while [[ -n $1 ]]; do
+usage() {
+	read -d '' <<-EOF
+		Usage: $progrm [OPTIONS] [GLOBS]
+
+		  -h, --help        - Display this help infomation.
+		  -r, --raw         - Show tarball's full name.
+		  -d, --dups        - Only show duplicate tarballs.
+
+	EOF
+	printf '%s' "$REPLY"
+}
+
+while [[ $1 ]]; do
 	case $1 in
 		-h|--help)
-			read -d '' <<-EOF
-				Usage: $progrm [OPTIONS] [GLOB]
-
-				  -h, --help        - Display this help infomation.
-				  -r, --raw         - Show tarball's full name.
-				  -d, --dups        - Only show duplicate tarballs.
-
-			EOF
-
-			printf '%s' "$REPLY"
+			usage
 			exit 0 ;;
 
 		-r|--raw)
-			raw=true ;;
+			readonly raw=true ;;
 
 		-d|--dups)
-			dups=true ;;
+			readonly dups=true ;;
 
 		--)
 			shift
@@ -43,7 +48,7 @@ done
 
 count=1
 
-for file in /var/cache/pacman/pkg/"$1"*.tar.zst; {
+for file in /var/cache/pacman/pkg/"$1"*.pkg.tar.zst; {
 	[[ -f $file ]] || exit 1
 
 	name=${file#/var/cache/pacman/pkg/}

@@ -2,10 +2,10 @@
 
 disk=$(lsblk -nso PATH "$(findmnt -nvo SOURCE /)" | tail -n 1)
 
-if [[ $Disk == *nvme* ]]; then
-	disk=${disk%p*}
+if [[ $disk == /dev/nvme* ]]; then
+	readonly disk=${disk%p*}
 else
-	disk=${disk%%[1-9]}
+	readonly disk=${disk%%[1-9]}
 fi
 
 efibootmgr --disk "$disk" --part 1 --create \

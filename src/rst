@@ -2,33 +2,38 @@
 
 trap 'sync' EXIT
 
-progrm=${0##*/}
+readonly progrm=${0##*/}
+
+eprintf() { printf "$@" 1>&2; }
 
 panic() {
-	printf '%s\n' "$progrm: $2" 1>&2
-	(( $1 > 0 )) && exit $1
+	eprintf '%s\n' "$progrm: $2"
+	(( $1 )) && exit $1
 }
 
-while [[ -n $1 ]]; do
+usage() {
+	read -d '' <<-EOF
+		Usage: $progrm [OPTIONS]...
+
+		  -h, --help      - Displays this help information.
+		  -f, --force     - Allow root to run $progrm(1).
+		  -y, --yes       - Answers 'yes' to all questions.
+
+	EOF
+	printf '%s' "$REPLY"
+}
+
+while [[ $1 ]]; do
 	case $1 in
 		-h|--help)
-			read -d '' <<-EOF
-				Usage: $progrm [OPTION]...
-
-				  -h, --help      - Displays this help information.
-				  -f, --force     - Allow 'root' to run $progrm(1).
-				  -y, --yes       - Answers 'yes' to all questions.
-
-			EOF
-
-			printf '%s' "$REPLY"
+			usage
 			exit 0 ;;
 
 		-f|--force)
-			force=true ;;
+			readonly force=true ;;
 
 		-y|--yes)
-			yes=true ;;
+			readonly yes=true ;;
 
 		*)
 			panic 1 "$1: invaild option..." ;;
@@ -36,11 +41,11 @@ while [[ -n $1 ]]; do
 	shift
 done
 
-if [[ $UID -eq 0 && -z $force ]]; then
+if [[ $UID -eq 0 && ! $force ]]; then
 	panic 1 'denied to run as root...'
 fi
 
-Ask() {
+ask_to_rm() {
 	local clear=true
 	until [[ $yes == true ]]; do
 		read -p "Do you want to clear $1? [Y/n]: "
@@ -61,36 +66,30 @@ Ask() {
 }
 
 for cache in "$HOME"/.cache/*; {
-	[[ -e $cache ]] || unset -v cache
+	[[ -e $cache ]] && ask_to_rm cache "$HOME"/.cache/*
+	unset -v cache
 	break
 }
-
-if [[ $cache ]]; then
-	Ask cache "$HOME"/.cache/*
-	unset -v cache
-fi
 
 ff_dir=$HOME/.mozilla/firefox
 ff_crash=$ff_dir/Crash\ Reports ff_ping=$ff_dir/Pending\ Pings
 
 if [[ -d $ff_crash || -d $ff_ping ]]; then
-	Ask "Firefox's reports" "$ff_crash" "$ff_ping"
+	ask_to_rm "Firefox's reports" "$ff_crash" "$ff_ping"
 fi
-
 unset -v ff_dir ff_crash ff_ping
 
-vim_info=$HOME/.viminfo vim_netr=$HOME/.vim/.netrwhist
+viminfo=$HOME/.viminfo vim_netr=$HOME/.vim/.netrwhist
 
-if [[ -f $vim_info || -f $vim_netr ]]; then
-	Ask "Vim's cache" "$vim_info" "$vim_netr"
+if [[ -f $viminfo || -f $vim_netr ]]; then
+	ask_to_rm "Vim's cache" "$viminfo" "$vim_netr"
 fi
-
 unset -v vim_info vim_netr
 
-nvim_shada=${XDG_DATA_HOME:-$HOME/.local/share}/nvim/shada/main.shada
+nvim_shada=${XDG_DATA_HOME:=$HOME/.local/share}/nvim/shada/main.shada
+nvim_netr=$XDG_DATA_HOME/nvim/shada/.netrwhist
 
-if [[ -f $nvim_shada ]]; then
-	Ask "Neovim's cache" "$nvim_shada"
+if [[ -f $nvim_shada || -f $nvim_netr ]]; then
+	ask_to_rm "Neovim's cache" "$nvim_shada" "$nvim_shada"
 fi
-
-unset -v nvim_shada
+unset -v nvim_shada nvim_netr

@@ -1,16 +1,18 @@
 #!/bin/sh
 
-if test -z "$1"; then
-	pactl set-sink-mute @DEFAULT_SINK@ toggle
-	case `pactl get-sink-mute @DEFAULT_SINK@` in
-		*no) volume=Unmuted ;;
-		*yes) volume=Muted ;;
-	esac
-else
+if [ "$1" ]; then
 	pactl set-sink-volume @DEFAULT_SINK@ "$@"
 	read _ _ _ _ volume _ <<-EOF
 		`pactl get-sink-volume @DEFAULT_SINK@`
 	EOF
+else
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
+	case `pactl get-sink-mute @DEFAULT_SINK@` in
+		*no)
+			volume=Unmuted ;;
+		*yes)
+			volume=Muted ;;
+	esac
 fi
 
 dunstify -u low -r 101 "Volume: $volume"

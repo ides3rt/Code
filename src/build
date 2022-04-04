@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 
-progrm=${0##*/}
-src_dir=$HOME/.local/src
+readonly progrm=${0##*/} src_dir=$HOME/.local/src
+
+eprintf() { printf "$@" 1>&2; }
 
 panic() {
-	printf '%s\n' "$progrm: $2" 1>&2
-	(( $1 > 0 )) && exit $1
+	eprintf '%s\n' "$progrm: $2"
+	(( $1 )) && exit $1
 }
 
 ((UID)) || panic 1 'denied to run as root...'
 
 for dep in git makepkg; {
 	if ! type -P "$dep" &>/dev/null; then
-		panic 0 "dependency, \`$Dep\`, not met..."
+		panic 0 "dependency, \`$dep\`, not met..."
 		(( dep_err++ ))
 	fi
 }
@@ -22,37 +23,42 @@ unset -v dep_err
 
 [[ -d $src_dir ]] || mkdir -p -- "$src_dir"
 
-if [[ -z $1 ]]; then
-	panic 0 'no argument were given...'
-	printf '%s\n' "See \`$progrm --help\` for usage." 1>&2
+if [[ ! $1 ]]; then
+	panic 0 'no arguments were given...'
+	eprintf '%s\n' "See \`$progrm --help\` for usage."
 	exit 1
 fi
 
-while [[ -n $1 ]]; do
+usage() {
+	read -d '' <<-EOF
+		Usage: $progrm [OPTIONS/AUR]
+		To remove the AUR, use \`pacman -Rns \$AUR\`.
+
+		  -h, --help        - Display this help infomation.
+		  -C, --check       - Check AUR's if up to date or not.
+
+	EOF
+	printf '%s' "$REPLY"
+}
+
+check_aur() {
+	local aur
+	for aur in "$src_dir"/*/PKGBUILD; {
+		aur=${aur%/*}
+
+		printf '%s' "${aur##*/}: "
+		git -C "$aur" pull
+	}
+}
+
+while [[ $1 ]]; do
 	case $1 in
 		-h|--help)
-			read -d '' <<-EOF
-				Usage: $progrm [OPTION/AUR]
-				To remove the AUR, use \`pacman -Rns \$AUR\`.
-
-				  -h, --help        - Display this help infomation.
-				  -C, --check       - Check AUR's if up to date or not.
-
-			EOF
-
-			printf '%s' "$REPLY"
+			usage
 			exit 0 ;;
 
 		-C|--check)
-			for aur in "$src_dir"/*/PKGBUILD; {
-				aur=${aur%/*}
-
-				printf '%s' "${aur##*/}: "
-				git -C "$aur" pull
-
-				printf '\n'
-			}
-
+			check_aur
 			exit 0 ;;
 
 		--)
@@ -71,25 +77,28 @@ done
 (( $# > 1 )) && panic 1 "can't build multiple AUR's at a time..."
 
 if [[ -d $1 ]]; then
-	aur=$1
+	readonly aur=$1
 else
+	readonly aur=$src_dir/$1
 	url=https://aur.archlinux.org/$1
-	aur=$src_dir/$1
 
 	if [[ -d $aur ]]; then
 		git -C "$aur" pull -q
 	else
 		panic 0 "'$1' not found, use \`git clone\` instead..."
-		git clone -q "$url" "$aur" || panic 1 'failed to use `git clone`...'
+		if ! git clone -q -- "$url" "$aur"; then
+			panic 1 'failed to use `git clone`...'
+		fi
 	fi
-
 	unset -v url
 fi
 
-temp_dir=${TMPDIR:-/tmp}/build-$SRANDOM
+readonly temp_dir=${TMPDIR:-/tmp}/build-$SRANDOM
 
-cp -r -- "$aur" "$temp_dir" || panic 1 'failed to copy the AUR to temp directory...'
+if ! cp -r -- "$aur" "$temp_dir"; then
+	panic 1 'failed to copy the AUR to temp directory...'
+fi
 
-trap "rm -rf -- $temp_dir; sync" EXIT
+trap "rm -rf -- \"$temp_dir\"; sync" EXIT
 
 (cd -- "$temp_dir" && makepkg -sir) || panic 1 "failed to build '$1'..."

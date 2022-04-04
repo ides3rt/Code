@@ -12,12 +12,12 @@ if ! type -P dmenu &>/dev/null; then
 	dmenu() { rofi -dmenu "$@"; }
 fi
 
-log=${XDG_DATA_HOME:-$HOME/.local/share}/0x0.log
+readonly log_file=${XDG_DATA_HOME:=$HOME/.local/share}/0x0.log
 
 [[ -d $XDG_DATA_HOME ]] || mkdir -p -- "$XDG_DATA_HOME"
-[[ -f $log ]] || > "$log"
+[[ -f $log_file ]] || > "$log_file"
 
-entry=(
+readonly entry=(
 	'Upload a File'
 	'Recent Upload(s)'
 )
@@ -26,14 +26,14 @@ select=$(printf '%s\n' "${entry[@]}" | dmenu -i -p 'Select')
 
 case $select in
 	${entry[0]})
-		list() {
+		list_curdir() {
 			echo ..
-			command ls -ALNpX1 --group-directories-first
+			command ls -ALNp1 --group-directories-first
 		}
 
 		while :; do
-			select=$(list | dmenu -i -p "$PWD")
-			[[ -z $select ]] && exit 0
+			select=$(list_curdir | dmenu -i -p "$PWD")
+			[[ $select ]] || exit 0
 
 			if [[ -f $select ]]; then
 				if ! url=$(curl -sF file=@"$select" https://0x0.st); then
@@ -45,7 +45,7 @@ case $select in
 				printf '%s' "$url" | xclip -sel p
 
 				dunstify -u low -- 'File Uploaded' "URL: $url"
-				echo "$(printf '%(%F_%T)T') $url $select" >> "$log"
+				echo "$(printf '%(%F_%T)T') $url $select" >> "$log_file"
 
 				exit 0
 			elif [[ -d $select ]]; then
@@ -60,11 +60,11 @@ case $select in
 
 	${entry[1]})
 		while read -r; do
-			data=("$REPLY" "${data[@]}")
-		done < "$log"
+			rev_file=("$REPLY" "${rev_file[@]}")
+		done < "$log_file"
 
-		read _ url _ <<< "$(printf '%s\n' "${data[@]}" | dmenu -i -p 'Select')"
-		[[ -z $url ]] && exit 0
+		read _ url _ <<< "$(printf '%s\n' "${rev_file[@]}" | dmenu -i -p 'Select')"
+		[[ $url ]] || exit 0
 
 		printf '%s' "$url" | xclip -sel c
 		printf '%s' "$url" | xclip -sel p

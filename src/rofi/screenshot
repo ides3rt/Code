@@ -2,18 +2,18 @@
 
 dmenu() { rofi -dmenu "$@"; }
 
-entry=(
+readonly entry=(
 	'Full Screen'
 	'Focused Window'
 	'Choose Specific Area/Window'
 )
 
-select=$(printf '%s\n' "${entry[@]}" | dmenu -i -p 'Screenshot')
+readonly select=$(printf '%s\n' "${entry[@]}" | dmenu -i -p 'Screenshot')
 
-[[ -z $select ]] && exit 0
+[[ $select ]] || exit 0
 
 ss() {
-	local dest=$HOME/Pictures/$(printf '%(%F_%T)T').png
+	declare -r dest=$HOME/Pictures/$(printf '%(%F_%T)T').png
 
 	if maim "$@" "$dest"; then
 		dunstify -u low -i "$dest" 'Captured Successfully...'

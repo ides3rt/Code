@@ -2,9 +2,9 @@
 
 dmenu() { rofi -dmenu "$@"; }
 
-file=${XDG_DATA_HOME:-$HOME/.local/share}/dictionary
+readonly file=${XDG_DATA_HOME:-$HOME/.local/share}/dictionary
 
-test -f "$file" || printf '' > "$file"
+[ -f "$file" ] || printf '' > "$file"
 
 list_word() {
 	while IFS=' - ' read word_list _; do
@@ -13,17 +13,17 @@ list_word() {
 	unset -v word_list
 }
 
-word=$(list_word | dmenu -i -p 'Word')
+readonly word=$(list_word | dmenu -i -p 'Word')
 unset -f list_word
 
-test -z "$word" && exit 0
+[ "$word" ] || exit 0
 
-list=$(grep -i ^"$word" "$file")
+readonly list=$(grep -i ^"$word" "$file")
 
-if test -n "$list"; then
+if [ "$list" ]; then
 	printf '%s\n' "$list" | dmenu -i -p 'Matching'
 else
-	meaning=$(dmenu -i -p 'Meaning')
-	test -z "$meaning" && exit 0
+	readonly meaning=$(dmenu -i -p 'Meaning')
+	[ "$meaning" ] || exit 0
 	echo "$word - $meaning" >> "$file"
 fi
